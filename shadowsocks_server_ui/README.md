@@ -1,10 +1,10 @@
-# Shadowsocks V2 Refactored
+# Shadowsocks Server UI
 
-基于 shadowsocks 官方库的事件循环架构重构版本，修复连续下载断开问题。
+A refactored Shadowsocks server based on the official shadowsocks library's event loop architecture, fixing continuous download disconnection issues.
 
-## 架构说明
+## Architecture
 
-### 核心架构
+### Core Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -35,7 +35,7 @@
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              Shadowsocks Library (官方库)                    │
+│              Shadowsocks Library (Official)                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
 │  │  eventloop   │  │   tcprelay   │  │   encrypt    │   │
 │  │  common      │  │  asyncdns    │  │              │   │
@@ -43,62 +43,62 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 模块说明
+## Module Description
 
-### 核心模块
+### Core Modules
 
-- **server.py**: 服务器封装类，集成 EventLoop 和 TCPRelayExt
-- **tcprelay_ext.py**: 扩展的 TCP 中继，继承 shadowsocks.tcprelay，添加统计和连接数限制
+- **server.py**: Server wrapper class, integrates EventLoop and TCPRelayExt
+- **tcprelay_ext.py**: Extended TCP relay, inherits shadowsocks.tcprelay, adds statistics and connection limits
 
-### GUI 模块
+### GUI Modules
 
-- **gui/main_window.py**: 主窗口，整合所有 GUI 组件
-- **gui/config_panel.py**: 配置输入面板
-- **gui/monitor_panel.py**: 实时监控面板
-- **gui/log_panel.py**: 日志显示面板
+- **gui/main_window.py**: Main window, integrates all GUI components
+- **gui/config_panel.py**: Configuration input panel
+- **gui/monitor_panel.py**: Real-time monitoring panel
+- **gui/log_panel.py**: Log display panel
 
-### 配置和统计模块
+### Configuration and Statistics Modules
 
-- **config/manager.py**: 配置管理器
-- **config/defaults.py**: 默认配置
-- **stats/collector.py**: 统计信息收集器
+- **config/manager.py**: Configuration manager
+- **config/defaults.py**: Default configuration
+- **stats/collector.py**: Statistics collector
 
-## 与官方库的差异
+## Differences from Official Library
 
-### 架构差异
+### Architecture Differences
 
-1. **事件循环架构** vs **线程池架构**
-   - 官方库：使用 epoll/kqueue/select 事件驱动
-   - 原版本：使用 ThreadPoolExecutor 线程池
-   - 重构版本：采用官方库的事件循环架构
+1. **Event Loop Architecture** vs **Thread Pool Architecture**
+   - Official library: Uses epoll/kqueue/select event-driven
+   - Original version: Uses ThreadPoolExecutor thread pool
+   - Refactored version: Adopts official library's event loop architecture
 
-2. **非阻塞 I/O** vs **阻塞 I/O**
-   - 官方库：所有 socket 设置为非阻塞，通过事件通知读写
-   - 原版本：使用阻塞式 recv()/send()
-   - 重构版本：采用官方库的非阻塞 I/O
+2. **Non-blocking I/O** vs **Blocking I/O**
+   - Official library: All sockets are non-blocking, notified via events
+   - Original version: Uses blocking recv()/send()
+   - Refactored version: Adopts official library's non-blocking I/O
 
-3. **超时管理**
-   - 官方库：时间戳队列 + 定期清理（`handle_periodic`）
-   - 原版本：独立清理线程定期检查空闲连接
-   - 重构版本：采用官方库的超时管理机制
+3. **Timeout Management**
+   - Official library: Timestamp queue + periodic cleanup (handle_periodic)
+   - Original version: Independent cleanup thread periodically checks idle connections
+   - Refactored version: Adopts official library's timeout management mechanism
 
-### 功能扩展
+### Feature Extensions
 
-1. **统计信息**: 添加连接数、流量统计
-2. **连接数限制**: 添加最大连接数限制
-3. **GUI 界面**: 提供图形化配置和监控界面
+1. **Statistics**: Added connection count and traffic statistics
+2. **Connection Limits**: Added maximum connection limit
+3. **GUI Interface**: Provides graphical configuration and monitoring interface
 
-## 使用方法
+## Usage
 
-### 运行 GUI 版本
+### Run GUI Version
 
 ```bash
-python -m shadowsocks_server_ui.main
+python -m shadowsocks_server_ui
 ```
 
-### 配置说明
+### Configuration
 
-配置文件：`shadowsocks_config.json`
+Configuration file: `shadowsocks_config.json`
 
 ```json
 {
@@ -112,38 +112,37 @@ python -m shadowsocks_server_ui.main
 }
 ```
 
-## 修复的问题
+## Fixed Issues
 
-### 连续下载断开问题
+### Continuous Download Disconnection Issue
 
-**原因分析**：
-- 原版本使用线程池 + 阻塞 I/O，长时间下载时可能出现超时误判
-- 原版本的超时管理机制不够精确
+**Root Cause Analysis**:
+- Original version used thread pool + blocking I/O, which could cause timeout misjudgment during long downloads
+- Original version's timeout management mechanism was not precise enough
 
-**解决方案**：
-- 采用官方库的事件循环架构，精确管理连接超时
-- 使用非阻塞 I/O，避免长时间阻塞
-- 在数据传输时及时更新活动时间，确保长时间下载的连接不会被误判为空闲
+**Solution**:
+- Adopts official library's event loop architecture for precise connection timeout management
+- Uses non-blocking I/O to avoid long blocking
+- Updates activity time promptly during data transmission, ensuring long download connections are not misjudged as idle
 
-## 技术要点
+## Technical Highlights
 
-1. **事件循环集成**: 直接使用 shadowsocks 的 EventLoop
-2. **超时管理修复**: 使用时间戳队列机制，精确管理连接超时
-3. **数据转发优化**: 使用非阻塞 socket + 事件驱动
-4. **统计信息集成**: 在 TCPRelayExt 中添加统计回调
+1. **Event Loop Integration**: Directly uses shadowsocks EventLoop
+2. **Timeout Management Fix**: Uses timestamp queue mechanism for precise connection timeout management
+3. **Data Forwarding Optimization**: Uses non-blocking socket + event-driven
+4. **Statistics Integration**: Adds statistics callbacks in TCPRelayExt
 
-## 依赖
+## Dependencies
 
 - shadowsocks >= 2.8.2
-- tkinter (Python 标准库)
+- tkinter (Python standard library)
 
-## Python 3.13 兼容性
+## Python 3.13 Compatibility
 
-本项目包含 Python 3.13 兼容性修复，解决了 shadowsocks 2.8.2 中 `collections.MutableMapping` 的问题。
+This project includes Python 3.13 compatibility fixes, resolving the `collections.MutableMapping` issue in shadowsocks 2.8.2.
 
-兼容性修复在 `compat.py` 中实现，会在导入 shadowsocks 库之前自动应用。
+Compatibility fixes are implemented in `compat.py` and automatically applied before importing shadowsocks.
 
-## 许可证
+## License
 
 Apache License 2.0
-
