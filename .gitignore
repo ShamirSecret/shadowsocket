@@ -37,8 +37,19 @@ env/
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Project specific - Configuration files with sensitive data
 shadowsocks_config.json
+*_config.json
+*config*.json
+*.env
+.env.*
+*.secret
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Executables
 *.exe
 *.app
 *.spec.bak
@@ -56,3 +67,5 @@ dist/
 *.tmp
 *.bak
 *~
+
+1.txt

@@ -108,7 +108,9 @@ See [docs/BUILD_V3_README.md](docs/BUILD_V3_README.md) for detailed build instru
 
 ## Configuration
 
-The server configuration is saved in `shadowsocks_config.json`:
+The server configuration is saved in `shadowsocks_config.json` (this file is gitignored for security):
+
+**⚠️ Security Note**: The `shadowsocks_config.json` file contains your password and is automatically excluded from git. Never commit this file to version control!
 
 ```json
 {
