@@ -3,7 +3,7 @@
 try:
     from shadowsocks_server_ui import compat  # noqa: F401
 except ImportError:
-    from . import compat  # noqa: F401
+from . import compat  # noqa: F401
 import time
 import logging
 import threading
@@ -203,16 +203,37 @@ class TCPRelayExt(tcprelay.TCPRelay):
             current_count = self._get_connection_count()
             if current_count >= self.max_connections:
                 if self.log_callback:
-                    self.log_callback(f"Connection limit exceeded ({current_count}/{self.max_connections}), rejecting new connection")
-                if self.stats_callback:
-                    self.stats_callback('reject_connection', None)
-                # Accept connection then close immediately
-                try:
-                    conn = self._server_socket.accept()
-                    conn[0].close()
-                except:
-                    pass
-                return
+                    self.log_callback(f"Connection limit exceeded ({current_count}/{self.max_connections}), disconnecting all clients to allow reconnection")
+                
+                # Disconnect all existing client connections (like restart)
+                disconnected_count = 0
+                with self._connection_count_lock:
+                    # Get all handlers except the server socket
+                    handlers_to_close = []
+                    server_fd = self._server_socket.fileno() if self._server_socket else None
+                    
+                    for handler_fd, handler in list(self._fd_to_handlers.items()):
+                        # Skip server socket
+                        if handler_fd == server_fd:
+                            continue
+                        # Only close TCPRelayHandlerExt instances (client connections)
+                        if isinstance(handler, TCPRelayHandlerExt):
+                            handlers_to_close.append(handler)
+                    
+                    # Close all client connections
+                    for handler in handlers_to_close:
+                        try:
+                            handler.destroy()
+                            disconnected_count += 1
+                        except Exception as e:
+                            if self.log_callback:
+                                self.log_callback(f"Error disconnecting client: {e}")
+                
+                if self.log_callback:
+                    self.log_callback(f"Disconnected {disconnected_count} client(s), ready for reconnection")
+                
+                # Now accept the new connection
+                # (fall through to normal connection handling)
             
             try:
                 conn = self._server_socket.accept()
@@ -234,7 +255,7 @@ class TCPRelayExt(tcprelay.TCPRelay):
                     self._stats_wrapper('add_connection', handler.connection_id, client_ip, target_addr)
                 if self.log_callback:
                     try:
-                        client_addr = conn[0].getpeername()[:2]
+                    client_addr = conn[0].getpeername()[:2]
                         self.log_callback(f"New client connected: {client_addr[0]}:{client_addr[1]} "
                                         f"(Current: {current_count}/{self.max_connections})")
                     except Exception:

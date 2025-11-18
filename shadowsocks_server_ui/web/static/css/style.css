@@ -284,77 +284,185 @@ header h1 {
 }
 
 .client-stats-container {
-    max-height: 400px;
+    max-height: 500px;
     overflow-y: auto;
 }
 
 .client-stat-item {
     background: #f9f9f9;
-    border-radius: 4px;
-    padding: 12px;
-    margin-bottom: 10px;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
     border-left: 3px solid #4CAF50;
+    transition: background-color 0.2s;
+}
+
+.client-stat-item:hover {
+    background: #f0f0f0;
 }
 
 .client-stat-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    padding: 2px 0;
+}
+
+.client-stat-header.clickable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.client-stat-header.clickable:hover {
+    opacity: 0.8;
+}
+
+.client-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 150px;
+}
+
+.client-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .client-ip {
-    font-weight: bold;
+    font-weight: 600;
     color: #333;
-    font-size: 1.1em;
+    font-size: 0.85em;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
 }
 
-.client-conn-info {
-    color: #666;
-    font-size: 0.9em;
+.client-conn-badge {
+    background: #667eea;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
 }
 
-.client-traffic {
+.client-traffic-compact {
     display: flex;
-    gap: 15px;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.75em;
+}
+
+.traffic-up {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.traffic-down {
+    color: #17a2b8;
+    font-weight: 500;
+}
+
+.traffic-total {
+    color: #667eea;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.expand-icon {
+    color: #999;
+    font-size: 0.7em;
+    transition: transform 0.2s;
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.expand-icon.expanded {
+    transform: rotate(180deg);
+}
+
+.client-details {
     margin-top: 8px;
-    font-size: 0.9em;
+    padding-top: 8px;
+    border-top: 1px solid #e0e0e0;
+    animation: slideDown 0.2s ease-out;
 }
 
-.traffic-item {
-    color: #555;
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+    }
 }
 
-.traffic-label {
-    color: #888;
-    margin-right: 5px;
+.target-list-header {
+    font-size: 0.75em;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 6px;
+    padding-left: 4px;
 }
 
 .target-list {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .target-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 8px;
-    margin: 4px 0;
+    padding: 4px 8px;
     background: #fff;
-    border-radius: 3px;
-    font-size: 0.85em;
+    border-radius: 4px;
+    font-size: 0.7em;
+    border: 1px solid #e8e8e8;
+}
+
+.target-item:hover {
+    background: #f8f9fa;
+    border-color: #667eea;
 }
 
 .target-address {
     font-family: 'Courier New', monospace;
     color: #2196F3;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    flex: 1;
+    min-width: 0;
+    margin-right: 8px;
+}
+
+.target-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.target-conn {
+    color: #666;
+    font-size: 0.9em;
 }
 
 .target-traffic {
-    color: #666;
+    color: #667eea;
+    font-weight: 500;
     font-size: 0.9em;
 }
 

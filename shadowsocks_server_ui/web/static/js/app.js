@@ -222,34 +222,59 @@ class ShadowsocksUI {
         const container = document.getElementById('client-stats-container');
         if (!container) return;
 
+        // Save expanded state before updating
+        const expandedClients = new Set();
+        container.querySelectorAll('.client-details[style*="block"]').forEach(details => {
+            const clientId = details.id.replace('details-', '');
+            expandedClients.add(clientId);
+        });
+
         if (!clientStats || clientStats.length === 0) {
             container.innerHTML = '<div class="no-data">No active clients</div>';
             return;
         }
 
         let html = '';
-        clientStats.forEach(client => {
-            html += `<div class="client-stat-item">`;
-            html += `<div class="client-stat-header">`;
-            html += `<span class="client-ip">${client.client_ip}</span>`;
-            html += `<span class="client-conn-info">${client.active_connections} active connection(s)</span>`;
+        clientStats.forEach((client, index) => {
+            const clientId = `client-${index}`;
+            const hasTargets = client.targets && client.targets.length > 0;
+            const isExpanded = expandedClients.has(clientId);
+            
+            html += `<div class="client-stat-item" data-client-id="${clientId}">`;
+            // Compact header - clickable to expand/collapse
+            html += `<div class="client-stat-header clickable" data-toggle="${clientId}">`;
+            html += `<div class="client-header-left">`;
+            html += `<span class="client-ip" title="${client.client_ip}">${client.client_ip}</span>`;
+            html += `<span class="client-conn-badge">${client.active_connections}</span>`;
             html += `</div>`;
-            html += `<div class="client-traffic">`;
-            html += `<span class="traffic-item"><span class="traffic-label">↑</span>${this.formatBytes(client.total_bytes_sent || 0)}</span>`;
-            html += `<span class="traffic-item"><span class="traffic-label">↓</span>${this.formatBytes(client.total_bytes_received || 0)}</span>`;
-            html += `<span class="traffic-item"><span class="traffic-label">Total:</span>${this.formatBytes(client.total_bytes || 0)}</span>`;
+            html += `<div class="client-header-right">`;
+            html += `<span class="client-traffic-compact">`;
+            html += `<span class="traffic-up">↑${this.formatBytes(client.total_bytes_sent || 0)}</span>`;
+            html += `<span class="traffic-down">↓${this.formatBytes(client.total_bytes_received || 0)}</span>`;
+            html += `<span class="traffic-total">${this.formatBytes(client.total_bytes || 0)}</span>`;
+            html += `</span>`;
+            if (hasTargets) {
+                html += `<span class="expand-icon" id="icon-${clientId}">${isExpanded ? '▲' : '▼'}</span>`;
+            }
+            html += `</div>`;
             html += `</div>`;
             
-            if (client.targets && client.targets.length > 0) {
+            // Collapsible details section
+            if (hasTargets) {
+                const displayStyle = isExpanded ? 'block' : 'none';
+                html += `<div class="client-details" id="details-${clientId}" style="display: ${displayStyle};">`;
+                html += `<div class="target-list-header">Active Targets (${client.targets.length})</div>`;
                 html += `<div class="target-list">`;
                 client.targets.forEach(target => {
                     html += `<div class="target-item">`;
-                    html += `<span class="target-address">${target.address}</span>`;
-                    html += `<span class="target-traffic">`;
-                    html += `${target.active_connections} conn · ${this.formatBytes(target.total_bytes || 0)}`;
+                    html += `<span class="target-address" title="${target.address}">${target.address}</span>`;
+                    html += `<span class="target-info">`;
+                    html += `<span class="target-conn">${target.active_connections} conn</span>`;
+                    html += `<span class="target-traffic">${this.formatBytes(target.total_bytes || 0)}</span>`;
                     html += `</span>`;
                     html += `</div>`;
                 });
+                html += `</div>`;
                 html += `</div>`;
             }
             
@@ -257,6 +282,31 @@ class ShadowsocksUI {
         });
 
         container.innerHTML = html;
+        
+        // Restore expanded icon state
+        expandedClients.forEach(clientId => {
+            const icon = document.getElementById(`icon-${clientId}`);
+            if (icon) {
+                icon.textContent = '▲';
+                icon.classList.add('expanded');
+            }
+        });
+    }
+
+    toggleClientDetails(clientId) {
+        const details = document.getElementById(`details-${clientId}`);
+        const icon = document.getElementById(`icon-${clientId}`);
+        if (!details || !icon) return;
+
+        if (details.style.display === 'none') {
+            details.style.display = 'block';
+            icon.textContent = '▲';
+            icon.classList.add('expanded');
+        } else {
+            details.style.display = 'none';
+            icon.textContent = '▼';
+            icon.classList.remove('expanded');
+        }
     }
 
     formatBytes(bytes) {
@@ -349,5 +399,19 @@ class ShadowsocksUI {
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new ShadowsocksUI();
+    
+    // Event delegation for client details toggle
+    const clientStatsContainer = document.getElementById('client-stats-container');
+    if (clientStatsContainer) {
+        clientStatsContainer.addEventListener('click', (e) => {
+            const header = e.target.closest('.client-stat-header.clickable');
+            if (header) {
+                const clientId = header.getAttribute('data-toggle');
+                if (clientId) {
+                    window.app.toggleClientDetails(clientId);
+                }
+            }
+        });
+    }
 });
 
