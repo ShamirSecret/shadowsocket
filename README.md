@@ -1,4 +1,4 @@
-# Shadowsocks Server V3
+# Shadowsocks Server UI
 
 A modern, cross-platform Shadowsocks proxy server with GUI, built on the official shadowsocks library's event loop architecture. Features Python 3.13+ compatibility and automated CI/CD for Windows and macOS builds.
 
