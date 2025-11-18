@@ -1,26 +1,26 @@
-"""服务器封装类 - 集成 EventLoop 和 TCPRelayExt"""
-# 首先导入兼容性修复
+"""Server wrapper class - integrates EventLoop and TCPRelayExt"""
+# Import compatibility fix first
 from . import compat  # noqa: F401
 import threading
 import logging
 from shadowsocks import eventloop, asyncdns
-# 在 shadowsocks 导入后再次尝试修复 OpenSSL
+# Try to fix OpenSSL again after shadowsocks import
 compat._patch_shadowsocks_openssl()
 from .tcprelay_ext import TCPRelayExt
 from .stats.collector import StatsCollector
 
 
 class ShadowsocksServer:
-    """Shadowsocks 服务器 - 基于事件循环架构"""
+    """Shadowsocks server - based on event loop architecture"""
     
     def __init__(self, config, stats_collector=None, log_callback=None):
         """
-        初始化服务器
+        Initialize server
         
         Args:
-            config: shadowsocks 配置字典
-            stats_collector: 统计收集器实例
-            log_callback: 日志回调函数
+            config: shadowsocks configuration dictionary
+            stats_collector: statistics collector instance
+            log_callback: log callback function
         """
         self.config = config
         self.stats_collector = stats_collector or StatsCollector()
@@ -34,26 +34,26 @@ class ShadowsocksServer:
         self._lock = threading.Lock()
     
     def _log(self, message):
-        """记录日志"""
+        """Log message"""
         if self.log_callback:
             self.log_callback(message)
         else:
             logging.info(message)
     
     def log_info(self, message):
-        """记录信息日志"""
+        """Log info message"""
         self._log(f"INFO: {message}")
     
     def log_error(self, message):
-        """记录错误日志"""
+        """Log error message"""
         self._log(f"ERROR: {message}")
     
     def log_warning(self, message):
-        """记录警告日志"""
+        """Log warning message"""
         self._log(f"WARNING: {message}")
     
     def _stats_callback(self, action, value=None, client_ip=None, target_addr=None):
-        """统计回调"""
+        """Statistics callback"""
         if action == 'add_connection':
             self.stats_collector.add_connection(value, client_ip, target_addr)
         elif action == 'remove_connection':
@@ -61,43 +61,43 @@ class ShadowsocksServer:
         elif action == 'reject_connection':
             self.stats_collector.reject_connection()
         elif action == 'update_target_addr':
-            # value 是 connection_id, client_ip 是 client_ip, target_addr 是 target_addr
+            # value is connection_id, client_ip is client_ip, target_addr is target_addr
             self.stats_collector.update_target_addr(value, target_addr)
         elif action == 'add_bytes_sent':
-            self.stats_collector.add_bytes_sent(value, client_ip)  # client_ip 实际是 connection_id
+            self.stats_collector.add_bytes_sent(value, client_ip)  # client_ip is actually connection_id
         elif action == 'add_bytes_received':
-            self.stats_collector.add_bytes_received(value, client_ip)  # client_ip 实际是 connection_id
+            self.stats_collector.add_bytes_received(value, client_ip)  # client_ip is actually connection_id
     
     def start(self):
-        """启动服务器"""
+        """Start server"""
         with self._lock:
             if self.running:
-                self._log("服务器已在运行")
+                self._log("Server is already running")
                 return False
             
             try:
-                # 创建事件循环
+                # Create event loop
                 self.eventloop = eventloop.EventLoop()
                 
-                # 创建 DNS 解析器
+                # Create DNS resolver
                 self.dns_resolver = asyncdns.DNSResolver()
                 self.dns_resolver.add_to_loop(self.eventloop)
                 
-                # 创建 TCP 中继（服务端模式）
+                # Create TCP relay (server mode)
                 max_connections = self.config.get('max_connections', 2000)
                 self.tcp_relay = TCPRelayExt(
                     self.config,
                     self.dns_resolver,
-                    is_local=False,  # 服务端模式
+                    is_local=False,  # Server mode
                     stats_callback=self._stats_callback,
                     log_callback=self._log,
                     max_connections=max_connections
                 )
                 
-                # 添加到事件循环
+                # Add to event loop
                 self.tcp_relay.add_to_loop(self.eventloop)
                 
-                # 启动事件循环（在独立线程中）
+                # Start event loop (in separate thread)
                 self.running = True
                 self.server_thread = threading.Thread(
                     target=self._run_eventloop,
@@ -108,25 +108,25 @@ class ShadowsocksServer:
                 
                 server_addr = self.config.get('server', '0.0.0.0')
                 server_port = self.config.get('server_port', 1080)
-                self.log_info(f"服务器启动成功，监听 {server_addr}:{server_port}")
-                self.log_info(f"最大连接数: {max_connections}")
-                self.log_info(f"连接空闲超时: {self.config.get('timeout', 43200)}秒")
-                self.log_info(f"加密方法: {self.config.get('method', 'aes-256-cfb')}")
+                self.log_info(f"Server started successfully, listening on {server_addr}:{server_port}")
+                self.log_info(f"Max connections: {max_connections}")
+                self.log_info(f"Idle timeout: {self.config.get('timeout', 43200)} seconds")
+                self.log_info(f"Encryption method: {self.config.get('method', 'aes-256-cfb')}")
                 
                 return True
             except Exception as e:
-                self._log(f"启动失败: {str(e)}")
+                self._log(f"Failed to start: {str(e)}")
                 import traceback
                 traceback.print_exc()
                 self.running = False
                 return False
     
     def _run_eventloop(self):
-        """运行事件循环（在独立线程中）"""
+        """Run event loop (in separate thread)"""
         try:
             self.eventloop.run()
         except Exception as e:
-            self._log(f"事件循环错误: {str(e)}")
+            self._log(f"Event loop error: {str(e)}")
             import traceback
             traceback.print_exc()
         finally:
@@ -134,37 +134,37 @@ class ShadowsocksServer:
                 self.running = False
     
     def stop(self):
-        """停止服务器"""
+        """Stop server"""
         with self._lock:
             if not self.running:
                 return
             
             self.running = False
             
-            # 停止事件循环
+            # Stop event loop
             if self.eventloop:
                 self.eventloop.stop()
             
-            # 关闭 TCP 中继
+            # Close TCP relay
             if self.tcp_relay:
                 self.tcp_relay.close(next_tick=False)
             
-            # 关闭 DNS 解析器
+            # Close DNS resolver
             if self.dns_resolver:
                 self.dns_resolver.close()
             
-            # 等待线程结束
+            # Wait for thread to finish
             if self.server_thread and self.server_thread.is_alive():
                 self.server_thread.join(timeout=2.0)
             
-            self._log("服务器已停止")
+            self._log("Server stopped")
     
     def get_stats(self):
-        """获取统计信息"""
+        """Get statistics"""
         return self.stats_collector.get_stats()
     
     def is_running(self):
-        """检查服务器是否运行中"""
+        """Check if server is running"""
         with self._lock:
             return self.running
 

@@ -24,8 +24,8 @@ class WebApp:
         self.stats_collector = StatsCollector()
         self.config_manager = ConfigManager()
         self.server_lock = threading.Lock()
-        self.logs = []  # 存储日志
-        self.max_logs = 500  # 最大日志条数
+        self.logs = []  # Store logs
+        self.max_logs = 500  # Maximum log entries
         self.logs_lock = threading.Lock()
         
         # Register routes
@@ -129,8 +129,8 @@ class WebApp:
         def get_logs():
             """Get server logs"""
             with self.logs_lock:
-                # 返回最近的日志（倒序，最新的在前）
-                return jsonify({'logs': self.logs[-100:]})  # 返回最近100条
+                # Return recent logs (reverse order, newest first)
+                return jsonify({'logs': self.logs[-100:]})  # Return last 100 entries
     
     def _log_callback(self, message):
         """Log callback for server"""
@@ -138,13 +138,13 @@ class WebApp:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         log_entry = f"[{timestamp}] {message}"
         
-        # 打印到控制台
+        # Print to console
         print(f"[SERVER] {message}")
         
-        # 存储到日志列表
+        # Store to log list
         with self.logs_lock:
             self.logs.append(log_entry)
-            # 限制日志数量，避免内存占用过大
+            # Limit log count to avoid excessive memory usage
             if len(self.logs) > self.max_logs:
                 self.logs = self.logs[-self.max_logs:]
     

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-打包脚本 V3 - 将 Shadowsocks V2 Refactored 打包成 exe 文件
-使用方法: python build_exe_v3.py
+Build script V3 - Package Shadowsocks Server UI into exe file
+Usage: python build_exe_v3.py
 
-支持：
-- Windows: 打包成 .exe
-- macOS: 打包成 .app（需要修改参数）
-- GitHub Actions: 自动在云端打包
+Supports:
+- Windows: Package as .exe
+- macOS: Package as .app (requires parameter modification)
+- GitHub Actions: Automatic cloud packaging
 """
 
 import PyInstaller.__main__
@@ -15,7 +15,7 @@ import os
 import sys
 import platform
 
-# 设置 Windows 控制台编码为 UTF-8
+# Set Windows console encoding to UTF-8
 if sys.platform == 'win32':
     try:
         sys.stdout.reconfigure(encoding='utf-8')
@@ -38,7 +38,7 @@ def build():
         print("[ERROR] shadowsocks library not installed, please run: pip install shadowsocks")
         sys.exit(1)
     
-    # 获取主文件路径（从脚本目录回到项目根目录）
+    # Get main file path (from script directory back to project root)
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
     main_file = os.path.join(project_root, 'shadowsocks_server_ui', 'main.py')
@@ -70,7 +70,7 @@ def build():
         args = [
             main_file,
             '--name=ShadowsocksServerV3',  # Output name
-            '--windowed',                   # No console window (GUI app)
+            '--console',                    # Show console window (for web server logs)
             '--clean',                      # Clean temporary files
             '--noconfirm',                  # Don't ask for overwrite
             '--hidden-import=shadowsocks',  # Ensure shadowsocks library is included
@@ -83,9 +83,6 @@ def build():
             '--hidden-import=shadowsocks.crypto.openssl',
             '--hidden-import=shadowsocks.crypto.sodium',
             '--hidden-import=shadowsocks.crypto.rc4_md5',
-            '--hidden-import=tkinter',
-            '--hidden-import=tkinter.ttk',
-            '--hidden-import=tkinter.scrolledtext',
             '--hidden-import=shadowsocks_server_ui',
             '--hidden-import=shadowsocks_server_ui.server',
             '--hidden-import=shadowsocks_server_ui.tcprelay_ext',
@@ -94,12 +91,12 @@ def build():
             '--hidden-import=shadowsocks_server_ui.config.defaults',
             '--hidden-import=shadowsocks_server_ui.stats',
             '--hidden-import=shadowsocks_server_ui.stats.collector',
-            '--hidden-import=shadowsocks_server_ui.gui',
-            '--hidden-import=shadowsocks_server_ui.gui.main_window',
-            '--hidden-import=shadowsocks_server_ui.gui.config_panel',
-            '--hidden-import=shadowsocks_server_ui.gui.monitor_panel',
-            '--hidden-import=shadowsocks_server_ui.gui.log_panel',
+            '--hidden-import=shadowsocks_server_ui.web',
+            '--hidden-import=shadowsocks_server_ui.web.app',
+            '--hidden-import=flask',
+            '--hidden-import=jinja2',
             '--collect-all=shadowsocks',    # Collect all shadowsocks related files
+            '--collect-all=flask',          # Collect all Flask related files
             f'--paths={project_root}',      # Add project root to path
         ]
         
@@ -117,28 +114,28 @@ def build():
         original_cwd = os.getcwd()
         os.chdir(project_root)
         try:
-        PyInstaller.__main__.run(args)
+            PyInstaller.__main__.run(args)
         finally:
             os.chdir(original_cwd)
         
-        # 根据平台确定输出文件路径
+        # Determine output file path based on platform
         dist_dir = os.path.join(project_root, 'dist')
         if is_windows:
             output_path = os.path.join(dist_dir, 'ShadowsocksServerV3.exe')
-            output_name = "exe 文件"
+            output_name = "exe file"
             platform_name = "Windows"
         elif is_macos:
             output_path = os.path.join(dist_dir, 'ShadowsocksServerV3.app')
-            output_name = "应用"
+            output_name = "application"
             platform_name = "macOS"
         else:
             output_path = os.path.join(dist_dir, 'ShadowsocksServerV3')
-            output_name = "可执行文件"
+            output_name = "executable"
             platform_name = platform.system()
         
         if os.path.exists(output_path):
             if is_macos:
-                # macOS .app 是目录，需要计算总大小
+                # macOS .app is a directory, need to calculate total size
                 def get_size(path):
                     total = 0
                     for dirpath, dirnames, filenames in os.walk(path):
@@ -178,7 +175,7 @@ def build():
     except Exception as e:
         print(f"\n[ERROR] Build failed: {str(e)}")
         print("\nPlease ensure the following dependencies are installed:")
-        print("pip install pyinstaller shadowsocks")
+        print("pip install -r requirements.txt pyinstaller")
         import traceback
         traceback.print_exc()
         sys.exit(1)

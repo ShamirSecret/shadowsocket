@@ -1,2 +1,2 @@
-"""统计信息模块"""
+"""Statistics module"""
 

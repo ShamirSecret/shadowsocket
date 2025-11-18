@@ -21,8 +21,8 @@ def main():
     print("=" * 60)
     
     # Create and run web app
-    # 使用 0.0.0.0 允许从任何接口访问（包括 localhost 和 127.0.0.1）
-    # 使用 8888 端口避免与 macOS AirPlay Receiver 冲突（5000 端口）
+    # Use 0.0.0.0 to allow access from any interface (including localhost and 127.0.0.1)
+    # Use port 8888 to avoid conflict with macOS AirPlay Receiver (port 5000)
     web_app = WebApp(host='0.0.0.0', port=8888)
     
     try:

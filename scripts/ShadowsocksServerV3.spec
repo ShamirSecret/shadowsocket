@@ -10,7 +10,10 @@ a = Analysis(
     [os.path.join(project_root, 'shadowsocks_server_ui', 'main.py')],
     pathex=[project_root],
     binaries=[],
-    datas=[],
+    datas=[
+        (os.path.join(project_root, 'shadowsocks_server_ui', 'web', 'templates'), 'shadowsocks_server_ui/web/templates'),
+        (os.path.join(project_root, 'shadowsocks_server_ui', 'web', 'static'), 'shadowsocks_server_ui/web/static'),
+    ],
     hiddenimports=[
         'shadowsocks',
         'shadowsocks.encrypt',
@@ -24,10 +27,6 @@ a = Analysis(
         'shadowsocks.crypto.rc4_md5',
         'shadowsocks.crypto.table',
         'shadowsocks.crypto.util',
-        'tkinter',
-        'tkinter.ttk',
-        'tkinter.scrolledtext',
-        'tkinter.messagebox',
         'shadowsocks_server_ui',
         'shadowsocks_server_ui.server',
         'shadowsocks_server_ui.tcprelay_ext',
@@ -36,11 +35,12 @@ a = Analysis(
         'shadowsocks_server_ui.config.defaults',
         'shadowsocks_server_ui.stats',
         'shadowsocks_server_ui.stats.collector',
-        'shadowsocks_server_ui.gui',
-        'shadowsocks_server_ui.gui.main_window',
-        'shadowsocks_server_ui.gui.config_panel',
-        'shadowsocks_server_ui.gui.monitor_panel',
-        'shadowsocks_server_ui.gui.log_panel',
+        'shadowsocks_server_ui.web',
+        'shadowsocks_server_ui.web.app',
+        'flask',
+        'flask.helpers',
+        'flask.templating',
+        'jinja2',
     ],
     hookspath=[],
     hooksconfig={},
@@ -64,12 +64,12 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # 无控制台窗口（GUI 应用）
+    console=True,  # Show console window (for web server logs)
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # 可以添加图标文件路径
+    icon=None,  # Can add icon file path
 )
 

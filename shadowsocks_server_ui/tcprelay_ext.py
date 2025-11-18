@@ -1,5 +1,5 @@
-"""TCP 中继扩展 - 继承 shadowsocks.tcprelay，添加统计和连接数限制"""
-# 首先导入兼容性修复
+"""TCP relay extension - extends shadowsocks.tcprelay, adds statistics and connection limit"""
+# Import compatibility fix first
 from . import compat  # noqa: F401
 import time
 import logging
@@ -10,51 +10,51 @@ from shadowsocks import tcprelay, eventloop, shell
 
 
 class TCPRelayHandlerExt(tcprelay.TCPRelayHandler):
-    """扩展的 TCPRelayHandler，添加统计回调"""
+    """Extended TCPRelayHandler with statistics callback"""
     
     def __init__(self, server, fd_to_handlers, loop, local_sock, config,
                  dns_resolver, is_local, stats_callback=None, log_callback=None):
-        # 先设置属性，避免父类初始化时调用方法时出错
+        # Set attributes first to avoid errors when parent class calls methods during initialization
         self.stats_callback = stats_callback
         self.log_callback = log_callback
         self.connection_id = id(self)
         self.bytes_sent = 0
         self.bytes_received = 0
-        self._start_time = time.time()  # 记录连接开始时间
+        self._start_time = time.time()  # Record connection start time
         
-        # 记录客户端地址
+        # Record client address
         try:
             self.client_ip = local_sock.getpeername()[0] if local_sock else None
         except Exception:
             self.client_ip = None
-        self.target_addr = None  # 将在连接建立后设置
+        self.target_addr = None  # Will be set after connection is established
         
-        # 调用父类初始化
+        # Call parent class initialization
         super().__init__(server, fd_to_handlers, loop, local_sock, config,
                         dns_resolver, is_local)
         
-        # 连接建立后，尝试获取目标地址
+        # After connection is established, try to get target address
         self._update_target_addr()
     
     def _update_target_addr(self):
-        """更新目标地址"""
+        """Update target address"""
         try:
-            # shadowsocks 库中，目标地址存储在 _remote_address 属性中
+            # In shadowsocks library, target address is stored in _remote_address attribute
             if hasattr(self, 'remote_address') and self.remote_address:
-                # remote_address 是一个属性，返回目标地址
+                # remote_address is a property that returns target address
                 addr = self.remote_address
                 if isinstance(addr, tuple) and len(addr) >= 2:
                     self.target_addr = f"{addr[0]}:{addr[1]}"
                 elif addr:
                     self.target_addr = str(addr)
             elif hasattr(self, '_remote_address') and self._remote_address:
-                # _remote_address 格式可能是 (host, port) 或字符串
+                # _remote_address format may be (host, port) or string
                 if isinstance(self._remote_address, tuple) and len(self._remote_address) >= 2:
                     self.target_addr = f"{self._remote_address[0]}:{self._remote_address[1]}"
                 else:
                     self.target_addr = str(self._remote_address)
             elif hasattr(self, '_remote_sock') and self._remote_sock:
-                # 如果远程 socket 已连接，从 socket 获取地址
+                # If remote socket is connected, get address from socket
                 try:
                     addr = self._remote_sock.getpeername()[:2]
                     self.target_addr = f"{addr[0]}:{addr[1]}"
@@ -64,115 +64,115 @@ class TCPRelayHandlerExt(tcprelay.TCPRelayHandler):
             pass
     
     def _update_activity(self, data_len=0):
-        """更新活动时间，并调用统计回调"""
+        """Update activity time and call statistics callback"""
         super()._update_activity(data_len)
         
-        # 在流阶段更新目标地址（此时连接已建立）
+        # Update target address in stream stage (connection is established)
         if self._stage == tcprelay.STAGE_STREAM:
             old_target = self.target_addr
-            # 尝试更新目标地址
+            # Try to update target address
             self._update_target_addr()
             
-            # 如果目标地址已更新（从 None 变为有值，或从旧值变为新值），更新统计
+            # If target address is updated (from None to value, or from old to new), update statistics
             if self.target_addr and self.target_addr != old_target and self.stats_callback:
-                # 更新连接信息中的目标地址
+                # Update target address in connection info
                 if hasattr(self, 'connection_id'):
-                    # 通过回调更新目标地址
+                    # Update target address through callback
                     self.stats_callback('update_target_addr', self.connection_id, self.client_ip, self.target_addr)
         
         if self.stats_callback and data_len > 0:
-            # 统计流量
+            # Statistics traffic
             if self._stage == tcprelay.STAGE_STREAM:
-                # 在流阶段，根据数据方向统计
-                # 注意：这里无法区分方向，由 TCPRelayExt 在 update_activity 中处理
+                # In stream stage, statistics by data direction
+                # Note: Cannot distinguish direction here, handled by TCPRelayExt in update_activity
                 pass
     
     def _write_to_sock(self, data, sock):
-        """重写写入方法，添加流量统计"""
+        """Override write method, add traffic statistics"""
         if not data or not sock:
             return super()._write_to_sock(data, sock)
         
         bytes_count = len(data)
-        # 先调用父类方法写入数据
+        # Call parent class method to write data first
         result = super()._write_to_sock(data, sock)
         
-        # 统计流量（注意：父类的 _write_to_sock 可能只写入部分数据，但这里统计的是尝试写入的数据量）
-        # 实际写入的数据量由父类处理，这里统计的是数据包大小
+        # Statistics traffic (Note: parent class _write_to_sock may only write partial data, but here we count attempted write amount)
+        # Actual written data amount is handled by parent class, here we count packet size
         if result and self.stats_callback and bytes_count > 0:
-            # 确保目标地址已更新（在流阶段）
+            # Ensure target address is updated (in stream stage)
             if self._stage == tcprelay.STAGE_STREAM:
                 old_target = self.target_addr
                 if not self.target_addr:
                     self._update_target_addr()
                 else:
-                    # 即使已有目标地址，也尝试更新（以防地址变化）
+                    # Even if target address exists, try to update (in case address changes)
                     self._update_target_addr()
                 
-                # 如果目标地址已更新，立即更新统计
+                # If target address is updated, update statistics immediately
                 if self.target_addr and self.target_addr != old_target:
                     self.stats_callback('update_target_addr', self.connection_id, self.client_ip, self.target_addr)
             
             if sock == self._local_sock:
-                # 发送到客户端（从远程接收的数据，加密后发送）
-                # 这是下行流量（服务器接收后发送给客户端）
+                # Send to client (data received from remote, encrypted then sent)
+                # This is downstream traffic (server receives then sends to client)
                 self.bytes_received += bytes_count
-                # 传递 connection_id 作为第三个参数（用于统计）
+                # Pass connection_id as third parameter (for statistics)
                 self.stats_callback('add_bytes_received', bytes_count, self.connection_id)
             elif sock == self._remote_sock:
-                # 发送到远程（从客户端接收的数据，解密后发送）
-                # 这是上行流量（客户端发送给服务器后转发给远程）
+                # Send to remote (data received from client, decrypted then sent)
+                # This is upstream traffic (client sends to server then forwards to remote)
                 self.bytes_sent += bytes_count
-                # 传递 connection_id 作为第三个参数（用于统计）
+                # Pass connection_id as third parameter (for statistics)
                 self.stats_callback('add_bytes_sent', bytes_count, self.connection_id)
         
         return result
     
     def _on_local_read(self):
-        """重写本地读取"""
-        # 调用父类方法，流量统计在 _write_to_sock 中处理
+        """Override local read"""
+        # Call parent class method, traffic statistics handled in _write_to_sock
         super()._on_local_read()
     
     def _on_remote_read(self):
-        """重写远程读取"""
-        # 调用父类方法，流量统计在 _write_to_sock 中处理
+        """Override remote read"""
+        # Call parent class method, traffic statistics handled in _write_to_sock
         super()._on_remote_read()
     
     def destroy(self):
-        """销毁连接，调用统计回调"""
+        """Destroy connection, call statistics callback"""
         if self.stats_callback:
             self.stats_callback('remove_connection', self.connection_id)
         if self.log_callback:
             try:
                 if hasattr(self, '_local_sock') and self._local_sock:
                     client_addr = self._local_sock.getpeername()[:2]
-                    # 计算连接持续时间
+                    # Calculate connection duration
                     duration_str = ""
                     if hasattr(self, '_start_time'):
                         duration = time.time() - self._start_time
                         if duration < 1:
-                            duration_str = f" (持续: {duration*1000:.0f}ms)"
+                            duration_str = f" (Duration: {duration*1000:.0f}ms)"
                         else:
-                            duration_str = f" (持续: {duration:.1f}秒)"
+                            duration_str = f" (Duration: {duration:.1f}s)"
                     
-                    # 显示目标地址
+                    # Display target address
                     target_info = ""
                     if self.target_addr:
                         target_info = f" -> {self.target_addr}"
                     
-                    self.log_callback(f"客户端断开连接: {client_addr[0]}:{client_addr[1]}{target_info}{duration_str}")
+                    self.log_callback(f"Client disconnected: {client_addr[0]}:{client_addr[1]}{target_info}{duration_str}")
                 else:
-                    self.log_callback("客户端断开连接")
+                    self.log_callback("Client disconnected")
             except Exception:
-                self.log_callback("客户端断开连接")
+                self.log_callback("Client disconnected")
         super().destroy()
 
 
 class TCPRelayExt(tcprelay.TCPRelay):
-    """扩展的 TCPRelay，添加连接数限制和统计"""
+    """Extended TCPRelay with connection limit and statistics"""
     
     def __init__(self, config, dns_resolver, is_local, 
                  stats_callback=None, log_callback=None, max_connections=2000):
-        # 调用父类初始化
+        # Call parent class initialization
         super().__init__(config, dns_resolver, is_local)
         self.stats_callback = stats_callback
         self.log_callback = log_callback
@@ -180,30 +180,30 @@ class TCPRelayExt(tcprelay.TCPRelay):
         self._connection_count_lock = threading.Lock()
     
     def _get_connection_count(self):
-        """获取当前连接数"""
-        # _fd_to_handlers 包含服务器 socket 和所有客户端连接
-        # 服务器 socket 的 handler 是 self，客户端连接的 handler 是 TCPRelayHandlerExt 实例
+        """Get current connection count"""
+        # _fd_to_handlers contains server socket and all client connections
+        # Server socket handler is self, client connection handlers are TCPRelayHandlerExt instances
         with self._connection_count_lock:
             count = len(self._fd_to_handlers)
-            # 如果服务器 socket 在 _fd_to_handlers 中，减去1
+            # If server socket is in _fd_to_handlers, subtract 1
             if self._server_socket and self._server_socket.fileno() in self._fd_to_handlers:
                 count -= 1
             return max(0, count)
     
     def handle_event(self, sock, fd, event):
-        """处理事件，添加连接数限制"""
+        """Handle event, add connection limit"""
         if sock == self._server_socket:
             if event & eventloop.POLL_ERR:
                 raise Exception('server_socket error')
             
-            # 检查连接数限制
+            # Check connection limit
             current_count = self._get_connection_count()
             if current_count >= self.max_connections:
                 if self.log_callback:
-                    self.log_callback(f"连接数超限 ({current_count}/{self.max_connections})，拒绝新连接")
+                    self.log_callback(f"Connection limit exceeded ({current_count}/{self.max_connections}), rejecting new connection")
                 if self.stats_callback:
                     self.stats_callback('reject_connection', None)
-                # 接受连接后立即关闭
+                # Accept connection then close immediately
                 try:
                     conn = self._server_socket.accept()
                     conn[0].close()
@@ -213,7 +213,7 @@ class TCPRelayExt(tcprelay.TCPRelay):
             
             try:
                 conn = self._server_socket.accept()
-                # 创建扩展的 Handler
+                # Create extended Handler
                 handler = TCPRelayHandlerExt(
                     self, self._fd_to_handlers,
                     self._eventloop, conn[0], self._config,
@@ -221,21 +221,21 @@ class TCPRelayExt(tcprelay.TCPRelay):
                     stats_callback=self._stats_wrapper,
                     log_callback=self.log_callback
                 )
-                # 通知连接建立（在 handler 创建后，连接数已更新）
+                # Notify connection established (after handler created, connection count is updated)
                 current_count = self._get_connection_count()
                 if self.stats_callback:
-                    # 传递客户端 IP 和目标地址（目标地址可能还未建立，稍后更新）
+                    # Pass client IP and target address (target address may not be established yet, will update later)
                     client_ip = handler.client_ip if hasattr(handler, 'client_ip') else None
                     target_addr = handler.target_addr if hasattr(handler, 'target_addr') else None
-                    # 使用 _stats_wrapper 传递参数
+                    # Use _stats_wrapper to pass parameters
                     self._stats_wrapper('add_connection', handler.connection_id, client_ip, target_addr)
                 if self.log_callback:
                     try:
                         client_addr = conn[0].getpeername()[:2]
-                        self.log_callback(f"新客户端连接: {client_addr[0]}:{client_addr[1]} "
-                                        f"(当前: {current_count}/{self.max_connections})")
+                        self.log_callback(f"New client connected: {client_addr[0]}:{client_addr[1]} "
+                                        f"(Current: {current_count}/{self.max_connections})")
                     except Exception:
-                        self.log_callback(f"新客户端连接 (当前: {current_count}/{self.max_connections})")
+                        self.log_callback(f"New client connected (Current: {current_count}/{self.max_connections})")
             except Exception as e:
                 error_no = eventloop.errno_from_exception(e)
                 if error_no in (errno.EAGAIN, errno.EINPROGRESS, errno.EWOULDBLOCK):
@@ -254,25 +254,25 @@ class TCPRelayExt(tcprelay.TCPRelay):
                 logging.warn('poll removed fd')
     
     def _stats_wrapper(self, action, value=None, client_ip=None, target_addr=None):
-        """统计回调包装器"""
+        """Statistics callback wrapper"""
         if self.stats_callback:
             self.stats_callback(action, value, client_ip, target_addr)
     
     def update_activity(self, handler, data_len):
-        """更新活动时间，添加流量统计"""
-        # 调用父类方法
+        """Update activity time, add traffic statistics"""
+        # Call parent class method
         super().update_activity(handler, data_len)
         
-        # 添加流量统计
+        # Add traffic statistics
         if data_len > 0 and self.stats_callback:
-            # 注意：这里无法区分方向，但可以通过 handler 的 bytes_sent/received 获取
-            # 实际统计在 TCPRelayHandlerExt._write_to_sock 中完成
+            # Note: Cannot distinguish direction here, but can get from handler bytes_sent/received
+            # Actual statistics completed in TCPRelayHandlerExt._write_to_sock
             pass
     
     def remove_handler(self, handler):
-        """移除处理器"""
+        """Remove handler"""
         super().remove_handler(handler)
-        # 通知连接关闭
+        # Notify connection closed
         if isinstance(handler, TCPRelayHandlerExt) and self.stats_callback:
             self.stats_callback('remove_connection', handler.connection_id)
 

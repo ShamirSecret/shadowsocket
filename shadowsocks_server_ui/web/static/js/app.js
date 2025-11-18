@@ -50,10 +50,10 @@ class ShadowsocksUI {
                 const element = document.getElementById(key);
                 if (element) {
                     if (key === 'password') {
-                        // 密码字段：如果返回的是 '***'，说明已有密码，设置 placeholder 提示
+                        // Password field: If returned value is '***', password exists, set placeholder hint
                         if (config[key] === '***') {
                             element.value = '';
-                            element.placeholder = '密码已设置（输入新密码以更改）';
+                            element.placeholder = 'Password is set (enter new password to change)';
                         } else {
                             element.value = config[key];
                             element.placeholder = '';
@@ -191,12 +191,12 @@ class ShadowsocksUI {
     updateStatistics(stats) {
         if (!stats) return;
 
-        // 计算总活跃连接数（所有客户端的活跃连接数之和）
+        // Calculate total active connections (sum of all clients' active connections)
         const clientStats = stats.client_stats || [];
         const totalActiveConnections = clientStats.reduce((sum, client) => sum + (client.active_connections || 0), 0);
         
         const maxConn = stats.max_connections || 0;
-        // Current Connections 显示：总活跃连接数/最大连接数
+        // Current Connections display: total active connections / max connections
         document.getElementById('current-connections').textContent = 
             `${totalActiveConnections}/${maxConn}`;
         document.getElementById('total-connections').textContent = 
@@ -214,7 +214,7 @@ class ShadowsocksUI {
         document.getElementById('uptime').textContent = 
             this.formatUptime(stats.uptime || 0);
         
-        // 更新客户端统计
+        // Update client statistics
         this.updateClientStats(stats.client_stats || []);
     }
 
@@ -298,7 +298,7 @@ class ShadowsocksUI {
         // Update status every second
         this.updateInterval = setInterval(() => {
             this.updateStatus();
-            this.updateLogs();  // 同时更新日志
+            this.updateLogs();  // Also update logs
         }, 1000);
         
         // Initial update
@@ -315,7 +315,7 @@ class ShadowsocksUI {
                 const logsContainer = document.getElementById('logs-container');
                 const currentLogs = Array.from(logsContainer.children).map(el => el.textContent);
                 
-                // 只添加新的日志
+                // Only add new logs
                 data.logs.forEach(log => {
                     if (!currentLogs.includes(log)) {
                         const logEntry = document.createElement('div');
@@ -325,10 +325,10 @@ class ShadowsocksUI {
                     }
                 });
                 
-                // 保持滚动到底部
+                // Keep scrolling to bottom
                 logsContainer.scrollTop = logsContainer.scrollHeight;
                 
-                // 限制显示的日志数量（避免 DOM 元素过多）
+                // Limit displayed log count (avoid too many DOM elements)
                 while (logsContainer.children.length > 200) {
                     logsContainer.removeChild(logsContainer.firstChild);
                 }

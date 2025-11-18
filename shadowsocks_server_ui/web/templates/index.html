@@ -44,32 +44,32 @@
                             <label for="password">Password</label>
                             <div style="position: relative;">
                                 <input type="password" id="password" name="password" required 
-                                       placeholder="输入密码（已保存的密码不会显示）"
+                                       placeholder="Enter password (saved password will not be displayed)"
                                        style="width: 100%; padding-right: 40px;">
                                 <button type="button" id="toggle-password" 
                                         style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); 
                                                background: none; border: none; cursor: pointer; font-size: 0.9em; color: #666;"
-                                        title="显示/隐藏密码">👁️</button>
+                                        title="Show/hide password">👁️</button>
                             </div>
                             <small style="color: #888; margin-top: 4px; display: block;">
-                                密码保存在 shadowsocks_config.json 文件中
+                                Password is saved in shadowsocks_config.json file
                             </small>
                         </div>
                         <div class="form-group">
                             <label for="method">Encryption Method</label>
                             <select id="method" name="method" required>
-                                <option value="aes-256-cfb" selected>AES-256-CFB (推荐)</option>
+                                <option value="aes-256-cfb" selected>AES-256-CFB (Recommended)</option>
                                 <option value="aes-128-cfb">AES-128-CFB</option>
                                 <option value="aes-192-cfb">AES-192-CFB</option>
                                 <option value="aes-128-ctr">AES-128-CTR</option>
                                 <option value="aes-192-ctr">AES-192-CTR</option>
                                 <option value="aes-256-ctr">AES-256-CTR</option>
-                                <option value="chacha20-ietf-poly1305">ChaCha20-IETF-Poly1305 (更隐蔽)</option>
+                                <option value="chacha20-ietf-poly1305">ChaCha20-IETF-Poly1305 (More stealthy)</option>
                                 <option value="chacha20-ietf">ChaCha20-IETF</option>
                                 <option value="rc4-md5">RC4-MD5</option>
                                 <option value="bf-cfb">BF-CFB</option>
                             </select>
-                            <small>对于 ChatGPT/X，建议使用 ChaCha20 系列加密方法</small>
+                            <small>For ChatGPT/X, recommend using ChaCha20 series encryption methods</small>
                         </div>
                         <div class="form-group">
                             <label for="max_connections">Max Connections</label>
