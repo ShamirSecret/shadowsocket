@@ -5,31 +5,37 @@ A modern, cross-platform Shadowsocks proxy server with GUI, built on the officia
 ## Features
 
 - ✅ **Event Loop Architecture**: Based on shadowsocks official library, fixes continuous download disconnection issues
-- ✅ **Cross-Platform**: Supports Windows and macOS
-- ✅ **Modern GUI**: Clean, responsive interface with real-time monitoring
+- ✅ **Cross-Platform**: Supports Windows, macOS, and Linux
+- ✅ **Modern Web UI**: Beautiful, responsive web interface accessible from any browser
 - ✅ **Python 3.13+ Compatible**: Includes compatibility fixes for Python 3.13+
-- ✅ **Automated Builds**: GitHub Actions automatically builds Windows .exe and macOS .app
-- ✅ **Standalone Executables**: No Python installation required to run
+- ✅ **No GUI Dependencies**: Web-based interface works on all platforms without tkinter
 - ✅ **Connection Management**: Advanced connection pooling and timeout management
-- ✅ **Real-time Statistics**: Connection count, traffic monitoring, and performance metrics
+- ✅ **Real-time Statistics**: Live connection count, traffic monitoring, and performance metrics
+- ✅ **Easy Configuration**: Simple web form for server settings
 
 ## Quick Start
 
-### Option 1: Download Pre-built Executable (Recommended)
-
-1. Go to [Releases](https://github.com/ShamirSecret/shadowsocket/releases)
-2. Download `ShadowsocksServerV3.exe` (Windows) or `ShadowsocksServerV3.app` (macOS)
-3. Run the executable - no dependencies needed!
-
-### Option 2: Run from Source
+### Run from Source
 
 ```bash
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the server
+# Start the web interface
 python -m shadowsocks_server_ui
 ```
+
+Then open your browser and navigate to: **http://127.0.0.1:8888**
+
+**Note**: The web interface uses port 8888 to avoid conflicts with macOS AirPlay Receiver (port 5000).
+
+### Features
+
+- 🌐 **Web-based UI**: Modern, responsive web interface accessible from any browser
+- 📱 **Cross-platform**: Works on Windows, macOS, and Linux
+- 🎨 **Beautiful Design**: Clean, modern interface with real-time updates
+- ⚡ **Real-time Monitoring**: Live statistics and connection monitoring
+- 🔧 **Easy Configuration**: Simple web form for server configuration
 
 ## Project Structure
 
@@ -41,7 +47,10 @@ shadowsocks-server-v2/
 │   ├── tcprelay_ext.py          # Extended TCP relay
 │   ├── compat.py                # Python 3.13 compatibility
 │   ├── config/                  # Configuration management
-│   ├── gui/                     # GUI components
+│   ├── web/                     # Web interface (Flask)
+│   │   ├── app.py              # Flask application
+│   │   ├── templates/          # HTML templates
+│   │   └── static/             # CSS, JS, images
 │   └── stats/                   # Statistics collection
 ├── scripts/                      # Build and utility scripts
 │   ├── build_exe_v3.py          # Windows build script
@@ -92,10 +101,10 @@ See [docs/BUILD_V3_README.md](docs/BUILD_V3_README.md) for detailed build instru
 
 ## Requirements
 
-- Python 3.11, 3.12, or 3.13+ (for building from source)
+- Python 3.11, 3.12, or 3.13+
 - shadowsocks >= 2.8.2
-- tkinter (usually included with Python)
-- pyinstaller >= 5.0.0 (for building executables)
+- Flask >= 2.3.0
+- pyinstaller >= 5.0.0 (for building executables, optional)
 
 ## Configuration
 
@@ -134,19 +143,29 @@ This project includes compatibility fixes for Python 3.13+, which removed `colle
 
 ## Usage
 
-1. **Start Server**
-   - Configure listening address and port (default: 0.0.0.0:1080)
-   - Set password (required)
-   - Choose encryption method (default: aes-256-cfb)
-   - Configure max connections and timeouts
-   - Click "Start Server"
+1. **Start Web Interface**
+   ```bash
+   python -m shadowsocks_server_ui
+   ```
+   The web interface will start on http://127.0.0.1:5000
 
-2. **Monitor Server**
-   - View real-time connection statistics
-   - Monitor traffic (sent/received bytes and rates)
-   - Check server logs
+2. **Configure Server**
+   - Open http://127.0.0.1:5000 in your browser
+   - Fill in the configuration form:
+     - Listen Address (default: 0.0.0.0)
+     - Port (default: 1080)
+     - Password (required)
+     - Encryption Method (default: aes-256-cfb)
+     - Max Connections (default: 2000)
+     - Timeout settings
+   - Click "Save Configuration"
 
-3. **Client Configuration**
+3. **Start Server**
+   - Click "Start Server" button
+   - Monitor real-time statistics
+   - View server logs
+
+4. **Client Configuration**
    - Use standard Shadowsocks clients
    - Connect using the configured server address, port, password, and method
 
@@ -169,6 +188,29 @@ This project includes compatibility fixes for Python 3.13+, which removed `colle
 - Verify password and encryption method match client configuration
 - Check firewall settings
 - Ensure server is running and listening on correct address
+
+### ChatGPT/X "Attestation Denied" Issues
+
+If you encounter "attestation denied" errors when accessing ChatGPT, X (Twitter), or similar services:
+
+1. **Change Encryption Method**:
+   - Use `chacha20-ietf-poly1305` or `chacha20-ietf` instead of AES methods
+   - These methods are harder to detect
+
+2. **Check DNS Settings**:
+   - Ensure client uses proxy DNS
+   - Prevent DNS leaks
+
+3. **Browser Configuration**:
+   - Disable WebRTC (prevents IP leaks)
+   - Clear cookies and cache
+   - Use private/incognito mode
+
+4. **Server IP**:
+   - Server IP may be flagged as proxy/VPN
+   - Consider using residential IP instead of datacenter IP
+
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for detailed troubleshooting guide.
 
 ## Development
 

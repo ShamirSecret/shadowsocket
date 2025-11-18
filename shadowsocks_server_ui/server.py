@@ -4,6 +4,8 @@ from . import compat  # noqa: F401
 import threading
 import logging
 from shadowsocks import eventloop, asyncdns
+# 在 shadowsocks 导入后再次尝试修复 OpenSSL
+compat._patch_shadowsocks_openssl()
 from .tcprelay_ext import TCPRelayExt
 from .stats.collector import StatsCollector
 
@@ -38,18 +40,33 @@ class ShadowsocksServer:
         else:
             logging.info(message)
     
-    def _stats_callback(self, action, value=None):
+    def log_info(self, message):
+        """记录信息日志"""
+        self._log(f"INFO: {message}")
+    
+    def log_error(self, message):
+        """记录错误日志"""
+        self._log(f"ERROR: {message}")
+    
+    def log_warning(self, message):
+        """记录警告日志"""
+        self._log(f"WARNING: {message}")
+    
+    def _stats_callback(self, action, value=None, client_ip=None, target_addr=None):
         """统计回调"""
         if action == 'add_connection':
-            self.stats_collector.add_connection(value)
+            self.stats_collector.add_connection(value, client_ip, target_addr)
         elif action == 'remove_connection':
             self.stats_collector.remove_connection(value)
         elif action == 'reject_connection':
             self.stats_collector.reject_connection()
+        elif action == 'update_target_addr':
+            # value 是 connection_id, client_ip 是 client_ip, target_addr 是 target_addr
+            self.stats_collector.update_target_addr(value, target_addr)
         elif action == 'add_bytes_sent':
-            self.stats_collector.add_bytes_sent(value)
+            self.stats_collector.add_bytes_sent(value, client_ip)  # client_ip 实际是 connection_id
         elif action == 'add_bytes_received':
-            self.stats_collector.add_bytes_received(value)
+            self.stats_collector.add_bytes_received(value, client_ip)  # client_ip 实际是 connection_id
     
     def start(self):
         """启动服务器"""
@@ -91,9 +108,10 @@ class ShadowsocksServer:
                 
                 server_addr = self.config.get('server', '0.0.0.0')
                 server_port = self.config.get('server_port', 1080)
-                self._log(f"服务器启动成功，监听 {server_addr}:{server_port}")
-                self._log(f"最大连接数: {max_connections}")
-                self._log(f"连接空闲超时: {self.config.get('timeout', 43200)}秒")
+                self.log_info(f"服务器启动成功，监听 {server_addr}:{server_port}")
+                self.log_info(f"最大连接数: {max_connections}")
+                self.log_info(f"连接空闲超时: {self.config.get('timeout', 43200)}秒")
+                self.log_info(f"加密方法: {self.config.get('method', 'aes-256-cfb')}")
                 
                 return True
             except Exception as e:

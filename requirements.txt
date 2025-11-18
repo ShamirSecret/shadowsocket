@@ -1,7 +1,10 @@
-# Shadowsocks Server V3 Dependencies
+# Shadowsocks Server UI Dependencies
 
 # Shadowsocks library (required)
 shadowsocks>=2.8.2
+
+# Web framework
+flask>=2.3.0
 
 # Build tools (required for building executables)
 pyinstaller>=5.0.0

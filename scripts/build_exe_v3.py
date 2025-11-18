@@ -117,7 +117,7 @@ def build():
         original_cwd = os.getcwd()
         os.chdir(project_root)
         try:
-            PyInstaller.__main__.run(args)
+        PyInstaller.__main__.run(args)
         finally:
             os.chdir(original_cwd)
         

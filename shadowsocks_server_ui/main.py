@@ -1,36 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Shadowsocks 服务端 V2 - 主入口
-基于 shadowsocks 官方库的事件循环架构
+Shadowsocks Server UI - Main Entry Point
+Web-based interface using Flask
 """
-# 首先导入兼容性修复（必须在导入 shadowsocks 之前）
+# First import compatibility fix (must be before importing shadowsocks)
 from . import compat  # noqa: F401
 import sys
-import tkinter as tk
-from .server import ShadowsocksServer
-from .config.manager import ConfigManager
-from .gui.main_window import MainWindow
+from .web.app import WebApp
 
 
 def main():
-    """主函数"""
-    # 创建配置管理器
-    config_manager = ConfigManager()
+    """Main function"""
+    print("=" * 60)
+    print("Shadowsocks Server UI")
+    print("=" * 60)
+    print("\nStarting web interface...")
+    print("Open your browser and navigate to: http://127.0.0.1:8888")
+    print("\nPress Ctrl+C to stop the server")
+    print("=" * 60)
     
-    # 创建根窗口
-    root = tk.Tk()
+    # Create and run web app
+    # 使用 0.0.0.0 允许从任何接口访问（包括 localhost 和 127.0.0.1）
+    # 使用 8888 端口避免与 macOS AirPlay Receiver 冲突（5000 端口）
+    web_app = WebApp(host='0.0.0.0', port=8888)
     
-    # 创建主窗口
-    app = MainWindow(root, ShadowsocksServer, config_manager)
-    
-    # 设置关闭事件
-    root.protocol("WM_DELETE_WINDOW", app.on_closing)
-    
-    # 运行主循环
-    root.mainloop()
+    try:
+        web_app.run(debug=False)
+    except KeyboardInterrupt:
+        print("\n\nShutting down...")
+        web_app.stop()
+        sys.exit(0)
 
 
 if __name__ == "__main__":
     main()
-

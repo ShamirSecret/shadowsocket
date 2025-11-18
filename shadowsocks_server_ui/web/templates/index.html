@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadowsocks Server UI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Shadowsocks Server UI</h1>
+            <p class="subtitle">Modern Shadowsocks Proxy Server Management</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Server Status Card -->
+            <div class="card status-card">
+                <h2>Server Status</h2>
+                <div class="status-indicator">
+                    <span id="status-dot" class="dot stopped"></span>
+                    <span id="status-text">Stopped</span>
+                </div>
+                <div class="button-group">
+                    <button id="start-btn" class="btn btn-success">▶ Start Server</button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>■ Stop Server</button>
+                </div>
+            </div>
+
+            <!-- Configuration Card -->
+            <div class="card config-card">
+                <h2>Configuration</h2>
+                <form id="config-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="server">Listen Address</label>
+                            <input type="text" id="server" name="server" value="0.0.0.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="server_port">Port</label>
+                            <input type="number" id="server_port" name="server_port" value="1080" min="1" max="65535" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <div style="position: relative;">
+                                <input type="password" id="password" name="password" required 
+                                       placeholder="输入密码（已保存的密码不会显示）"
+                                       style="width: 100%; padding-right: 40px;">
+                                <button type="button" id="toggle-password" 
+                                        style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); 
+                                               background: none; border: none; cursor: pointer; font-size: 0.9em; color: #666;"
+                                        title="显示/隐藏密码">👁️</button>
+                            </div>
+                            <small style="color: #888; margin-top: 4px; display: block;">
+                                密码保存在 shadowsocks_config.json 文件中
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label for="method">Encryption Method</label>
+                            <select id="method" name="method" required>
+                                <option value="aes-256-cfb" selected>AES-256-CFB (推荐)</option>
+                                <option value="aes-128-cfb">AES-128-CFB</option>
+                                <option value="aes-192-cfb">AES-192-CFB</option>
+                                <option value="aes-128-ctr">AES-128-CTR</option>
+                                <option value="aes-192-ctr">AES-192-CTR</option>
+                                <option value="aes-256-ctr">AES-256-CTR</option>
+                                <option value="chacha20-ietf-poly1305">ChaCha20-IETF-Poly1305 (更隐蔽)</option>
+                                <option value="chacha20-ietf">ChaCha20-IETF</option>
+                                <option value="rc4-md5">RC4-MD5</option>
+                                <option value="bf-cfb">BF-CFB</option>
+                            </select>
+                            <small>对于 ChatGPT/X，建议使用 ChaCha20 系列加密方法</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="max_connections">Max Connections</label>
+                            <input type="number" id="max_connections" name="max_connections" value="2000" min="1" max="10000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="timeout">Idle Timeout (seconds)</label>
+                            <input type="number" id="timeout" name="timeout" value="43200" min="60" max="604800" required>
+                            <small>Default: 43200 (12 hours). Only checks idle time, supports long downloads.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="target_connect_timeout">Target Connect Timeout (seconds)</label>
+                            <input type="number" id="target_connect_timeout" name="target_connect_timeout" value="30" min="5" max="300" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Configuration</button>
+                </form>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="card stats-card">
+                <h2>Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Current Connections</div>
+                        <div class="stat-value" id="current-connections">0/0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Connections</div>
+                        <div class="stat-value" id="total-connections">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Rejected</div>
+                        <div class="stat-value" id="rejected-connections">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Closed</div>
+                        <div class="stat-value" id="closed-connections">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Bytes Sent</div>
+                        <div class="stat-value" id="bytes-sent">0 B</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Bytes Received</div>
+                        <div class="stat-value" id="bytes-received">0 B</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Traffic</div>
+                        <div class="stat-value" id="total-traffic">0 B</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Uptime</div>
+                        <div class="stat-value" id="uptime">00:00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Statistics Card -->
+            <div class="card client-stats-card">
+                <h2>Client Statistics</h2>
+                <div id="client-stats-container" class="client-stats-container">
+                    <div class="no-data">No active clients</div>
+                </div>
+            </div>
+
+            <!-- Logs Card -->
+            <div class="card logs-card">
+                <h2>Server Logs</h2>
+                <div id="logs-container" class="logs-container">
+                    <div class="log-entry">Ready to start server...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+
