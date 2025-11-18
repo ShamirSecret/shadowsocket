@@ -1,7 +1,11 @@
 """Configuration management"""
 import json
 import os
-from .defaults import DEFAULT_CONFIG
+
+try:
+    from shadowsocks_server_ui.config.defaults import DEFAULT_CONFIG
+except ImportError:
+    from .defaults import DEFAULT_CONFIG
 
 
 class ConfigManager:

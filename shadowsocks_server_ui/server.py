@@ -1,13 +1,22 @@
 """Server wrapper class - integrates EventLoop and TCPRelayExt"""
 # Import compatibility fix first
-from . import compat  # noqa: F401
+try:
+    from shadowsocks_server_ui import compat  # noqa: F401
+except ImportError:
+    from . import compat  # noqa: F401
+
 import threading
 import logging
 from shadowsocks import eventloop, asyncdns
 # Try to fix OpenSSL again after shadowsocks import
 compat._patch_shadowsocks_openssl()
-from .tcprelay_ext import TCPRelayExt
-from .stats.collector import StatsCollector
+
+try:
+    from shadowsocks_server_ui.tcprelay_ext import TCPRelayExt
+    from shadowsocks_server_ui.stats.collector import StatsCollector
+except ImportError:
+    from .tcprelay_ext import TCPRelayExt
+    from .stats.collector import StatsCollector
 
 
 class ShadowsocksServer:

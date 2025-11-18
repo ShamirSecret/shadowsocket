@@ -67,8 +67,13 @@ def build():
     else:
         # Build PyInstaller arguments
         print("\nUsing command line arguments...")
+        # Use __main__.py as entry point to support relative imports
+        main_module = os.path.join(project_root, 'shadowsocks_server_ui', '__main__.py')
+        if not os.path.exists(main_module):
+            main_module = main_file
+        
         args = [
-            main_file,
+            main_module,
             '--name=ShadowsocksServerV3',  # Output name
             '--console',                    # Show console window (for web server logs)
             '--clean',                      # Clean temporary files

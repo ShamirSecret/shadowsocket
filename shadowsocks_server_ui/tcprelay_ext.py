@@ -1,6 +1,9 @@
 """TCP relay extension - extends shadowsocks.tcprelay, adds statistics and connection limit"""
 # Import compatibility fix first
-from . import compat  # noqa: F401
+try:
+    from shadowsocks_server_ui import compat  # noqa: F401
+except ImportError:
+    from . import compat  # noqa: F401
 import time
 import logging
 import threading

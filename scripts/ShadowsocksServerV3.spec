@@ -7,7 +7,7 @@ spec_dir = os.path.dirname(os.path.abspath(SPEC))
 project_root = os.path.dirname(spec_dir)
 
 a = Analysis(
-    [os.path.join(project_root, 'shadowsocks_server_ui', 'main.py')],
+    [os.path.join(project_root, 'shadowsocks_server_ui', '__main__.py')],
     pathex=[project_root],
     binaries=[],
     datas=[

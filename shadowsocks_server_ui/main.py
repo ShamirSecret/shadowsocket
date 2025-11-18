@@ -4,10 +4,31 @@
 Shadowsocks Server UI - Main Entry Point
 Web-based interface using Flask
 """
-# First import compatibility fix (must be before importing shadowsocks)
-from . import compat  # noqa: F401
 import sys
-from .web.app import WebApp
+import os
+
+# Add the package directory to sys.path for PyInstaller compatibility
+if getattr(sys, 'frozen', False):
+    # Running as compiled executable
+    base_path = sys._MEIPASS
+else:
+    # Running as script
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if base_path not in sys.path:
+        sys.path.insert(0, base_path)
+
+# First import compatibility fix (must be before importing shadowsocks)
+try:
+    from shadowsocks_server_ui import compat  # noqa: F401
+except ImportError:
+    # Fallback for relative import when running as module
+    from . import compat  # noqa: F401
+
+try:
+    from shadowsocks_server_ui.web.app import WebApp
+except ImportError:
+    # Fallback for relative import when running as module
+    from .web.app import WebApp
 
 
 def main():

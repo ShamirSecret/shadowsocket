@@ -3,9 +3,15 @@ from flask import Flask, render_template, jsonify, request
 import threading
 import json
 import os
-from ..server import ShadowsocksServer
-from ..config.manager import ConfigManager
-from ..stats.collector import StatsCollector
+
+try:
+    from shadowsocks_server_ui.server import ShadowsocksServer
+    from shadowsocks_server_ui.config.manager import ConfigManager
+    from shadowsocks_server_ui.stats.collector import StatsCollector
+except ImportError:
+    from ..server import ShadowsocksServer
+    from ..config.manager import ConfigManager
+    from ..stats.collector import StatsCollector
 
 
 class WebApp:
