@@ -3,7 +3,7 @@
 try:
     from shadowsocks_server_ui import compat  # noqa: F401
 except ImportError:
-from . import compat  # noqa: F401
+    from . import compat  # noqa: F401
 import time
 import logging
 import threading
@@ -255,7 +255,7 @@ class TCPRelayExt(tcprelay.TCPRelay):
                     self._stats_wrapper('add_connection', handler.connection_id, client_ip, target_addr)
                 if self.log_callback:
                     try:
-                    client_addr = conn[0].getpeername()[:2]
+                        client_addr = conn[0].getpeername()[:2]
                         self.log_callback(f"New client connected: {client_addr[0]}:{client_addr[1]} "
                                         f"(Current: {current_count}/{self.max_connections})")
                     except Exception:
