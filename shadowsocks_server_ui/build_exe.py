@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-打包脚本 - 将 Shadowsocks V2 Refactored 打包成 exe 文件
-使用方法: python -m shadowsocks_v2_refactored.build_exe
+Build script - Package Shadowsocks Server UI into exe file
+Usage: python -m shadowsocks_server_ui.build_exe
 """
 
 import PyInstaller.__main__
@@ -49,7 +49,7 @@ def build():
         '--hidden-import=tkinter.ttk',
         '--hidden-import=tkinter.scrolledtext',
         '--collect-all=shadowsocks',    # 收集所有 shadowsocks 相关文件
-        '--add-data=shadowsocks_v2_refactored;shadowsocks_v2_refactored',  # 包含模块
+        f'--add-data=shadowsocks_server_ui;shadowsocks_server_ui',  # Include module
     ]
     
     try:

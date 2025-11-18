@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Shadowsocks V2 Refactored - 模块入口
-支持 python -m shadowsocks_v2_refactored 运行
+Shadowsocks Server UI - Module Entry Point
+Supports running with: python -m shadowsocks_server_ui
 """
 from .main import main
 

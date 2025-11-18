@@ -41,7 +41,7 @@ def build():
     # 获取主文件路径（从脚本目录回到项目根目录）
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
-    main_file = os.path.join(project_root, 'shadowsocks_v2_refactored', 'main.py')
+    main_file = os.path.join(project_root, 'shadowsocks_server_ui', 'main.py')
     if not os.path.exists(main_file):
         print(f"[ERROR] 找不到主文件: {main_file}")
         sys.exit(1)

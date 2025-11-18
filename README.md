@@ -28,14 +28,14 @@ A modern, cross-platform Shadowsocks proxy server with GUI, built on the officia
 pip install -r requirements.txt
 
 # Run the server
-python -m shadowsocks_v2_refactored
+python -m shadowsocks_server_ui
 ```
 
 ## Project Structure
 
 ```
 shadowsocks-server-v2/
-├── shadowsocks_v2_refactored/    # Main application code
+├── shadowsocks_server_ui/        # Main application code
 │   ├── main.py                   # Entry point
 │   ├── server.py                 # Server implementation
 │   ├── tcprelay_ext.py          # Extended TCP relay
@@ -176,10 +176,10 @@ This project includes compatibility fixes for Python 3.13+, which removed `colle
 
 ```bash
 # Test imports
-python -c "from shadowsocks_v2_refactored import compat; print('OK')"
+python -c "from shadowsocks_server_ui import compat; print('OK')"
 
 # Test server
-python -m shadowsocks_v2_refactored
+python -m shadowsocks_server_ui
 ```
 
 ### Contributing

@@ -24,7 +24,7 @@ pyinstaller ShadowsocksServerV3.spec --clean --noconfirm
 ### 方法 3：命令行参数
 
 ```bash
-pyinstaller shadowsocks_v2_refactored/main.py \
+pyinstaller shadowsocks_server_ui/main.py \
     --name=ShadowsocksServerV3 \
     --onefile \
     --windowed \

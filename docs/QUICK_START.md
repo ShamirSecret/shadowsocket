@@ -74,5 +74,5 @@ python build_macos_app.py
 
 - 详细打包说明：`BUILD_README.md`
 - CI/CD 说明：`CI_BUILD_README.md`
-- 项目文档：`shadowsocks_v2_refactored/README.md`
+- 项目文档：`shadowsocks_server_ui/README.md`
 

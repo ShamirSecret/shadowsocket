@@ -2,7 +2,7 @@
 
 ```
 shadowsocks-server-v2/
-├── shadowsocks_v2_refactored/    # Main application code
+├── shadowsocks_server_ui/        # Main application code
 │   ├── __init__.py
 │   ├── __main__.py
 │   ├── main.py                   # Entry point

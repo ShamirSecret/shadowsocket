@@ -23,12 +23,12 @@ Thank you for your interest in contributing! This document provides guidelines f
 
 4. **Run the application**
    ```bash
-   python -m shadowsocks_v2_refactored
+   python -m shadowsocks_server_ui
    ```
 
 ## Project Structure
 
-- `shadowsocks_v2_refactored/` - Main application code
+- `shadowsocks_server_ui/` - Main application code
 - `scripts/` - Build and utility scripts
 - `docs/` - Documentation
 - `.github/workflows/` - CI/CD workflows

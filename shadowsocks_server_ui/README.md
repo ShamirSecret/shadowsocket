@@ -93,7 +93,7 @@
 ### 运行 GUI 版本
 
 ```bash
-python -m shadowsocks_v2_refactored.main
+python -m shadowsocks_server_ui.main
 ```
 
 ### 配置说明
