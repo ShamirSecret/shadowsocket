@@ -29,7 +29,7 @@ jobs:
     
     - name: Build Windows EXE
       run: |
-        python build_exe_v3.py
+        python scripts/build_exe_v3.py
     
     - name: Upload EXE artifact
       uses: actions/upload-artifact@v4

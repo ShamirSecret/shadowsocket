@@ -1,134 +1,206 @@
-# Shadowsocks 服务端 V2
+# Shadowsocks Server V3
 
-现代化的 Shadowsocks 代理服务器，带图形界面和详细的监控功能。
+A modern, cross-platform Shadowsocks proxy server with GUI, built on the official shadowsocks library's event loop architecture. Features Python 3.13+ compatibility and automated CI/CD for Windows and macOS builds.
 
-## 文件说明
+## Features
 
-### 核心文件
-- **shadowsocket_v2.py** - 主程序文件，包含服务器和GUI界面
-- **ShadowsocksServerV2.spec** - PyInstaller 打包配置文件
+- ✅ **Event Loop Architecture**: Based on shadowsocks official library, fixes continuous download disconnection issues
+- ✅ **Cross-Platform**: Supports Windows and macOS
+- ✅ **Modern GUI**: Clean, responsive interface with real-time monitoring
+- ✅ **Python 3.13+ Compatible**: Includes compatibility fixes for Python 3.13+
+- ✅ **Automated Builds**: GitHub Actions automatically builds Windows .exe and macOS .app
+- ✅ **Standalone Executables**: No Python installation required to run
+- ✅ **Connection Management**: Advanced connection pooling and timeout management
+- ✅ **Real-time Statistics**: Connection count, traffic monitoring, and performance metrics
 
-### 打包相关
-- **build_exe_v2.py** - Python 打包脚本
-- **build_v2.bat** - Windows 批处理打包脚本（双击运行）
-- **BUILD_README.md** - 详细的打包说明文档
-- **requirements.txt** - Python 依赖包列表
+## Quick Start
 
-### 可执行文件
-- **ShadowsocksServerV2.exe** - 打包后的可执行文件（如果存在）
+### Option 1: Download Pre-built Executable (Recommended)
 
-## 快速开始
+1. Go to [Releases](https://github.com/ShamirSecret/shadowsocket/releases)
+2. Download `ShadowsocksServerV3.exe` (Windows) or `ShadowsocksServerV3.app` (macOS)
+3. Run the executable - no dependencies needed!
 
-### 直接运行 Python 脚本
+### Option 2: Run from Source
 
-1. 安装依赖：
 ```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the server
+python -m shadowsocks_v2_refactored
 ```
 
-2. 运行程序：
+## Project Structure
+
+```
+shadowsocks-server-v2/
+├── shadowsocks_v2_refactored/    # Main application code
+│   ├── main.py                   # Entry point
+│   ├── server.py                 # Server implementation
+│   ├── tcprelay_ext.py          # Extended TCP relay
+│   ├── compat.py                # Python 3.13 compatibility
+│   ├── config/                  # Configuration management
+│   ├── gui/                     # GUI components
+│   └── stats/                   # Statistics collection
+├── scripts/                      # Build and utility scripts
+│   ├── build_exe_v3.py          # Windows build script
+│   ├── build_macos_app.py       # macOS build script
+│   └── ShadowsocksServerV3.spec # PyInstaller spec
+├── docs/                         # Documentation
+│   ├── BUILD_V3_README.md       # Build instructions
+│   ├── CI_BUILD_README.md       # CI/CD guide
+│   └── QUICK_START.md           # Quick start guide
+├── .github/workflows/            # GitHub Actions CI/CD
+├── requirements.txt              # Python dependencies
+└── README.md                     # This file
+```
+
+## Building
+
+### Automated Build (Recommended)
+
+The project uses GitHub Actions to automatically build executables:
+
+1. Push code to GitHub
+2. Go to Actions tab
+3. Select "Build Windows EXE" workflow
+4. Click "Run workflow"
+5. Download the built executable from Artifacts
+
+See [docs/CI_BUILD_README.md](docs/CI_BUILD_README.md) for detailed instructions.
+
+### Manual Build
+
+#### Windows
+
 ```bash
-python shadowsocket_v2.py
+python scripts/build_exe_v3.py
 ```
 
-### 打包成 exe 文件
+Output: `dist/ShadowsocksServerV3.exe`
 
-**方法一：使用批处理文件（推荐）**
+#### macOS
+
 ```bash
-双击运行 build_v2.bat
+python scripts/build_macos_app.py
 ```
 
-**方法二：使用 Python 脚本**
+Output: `dist/ShadowsocksServerV3.app`
+
+See [docs/BUILD_V3_README.md](docs/BUILD_V3_README.md) for detailed build instructions.
+
+## Requirements
+
+- Python 3.11, 3.12, or 3.13+ (for building from source)
+- shadowsocks >= 2.8.2
+- tkinter (usually included with Python)
+- pyinstaller >= 5.0.0 (for building executables)
+
+## Configuration
+
+The server configuration is saved in `shadowsocks_config.json`:
+
+```json
+{
+  "server": "0.0.0.0",
+  "server_port": 1080,
+  "password": "your_password",
+  "method": "aes-256-cfb",
+  "max_connections": 2000,
+  "timeout": 43200,
+  "target_connect_timeout": 30
+}
+```
+
+## Architecture
+
+This project refactors the original implementation to use the official shadowsocks library's event loop architecture:
+
+- **Event Loop**: Uses epoll/kqueue/select for efficient I/O
+- **Non-blocking I/O**: All sockets are non-blocking with event-driven reads/writes
+- **Timeout Management**: Precise timeout handling using timestamp queues
+- **Connection Pooling**: Advanced connection management with limits
+
+### Key Improvements
+
+1. **Fixed Download Issues**: The event loop architecture prevents connection timeouts during long downloads
+2. **Better Performance**: Non-blocking I/O improves throughput
+3. **Python 3.13 Support**: Compatibility layer fixes `collections.MutableMapping` issue
+
+## Python 3.13 Compatibility
+
+This project includes compatibility fixes for Python 3.13+, which removed `collections.MutableMapping`. The fix is automatically applied in `compat.py` before importing shadowsocks.
+
+## Usage
+
+1. **Start Server**
+   - Configure listening address and port (default: 0.0.0.0:1080)
+   - Set password (required)
+   - Choose encryption method (default: aes-256-cfb)
+   - Configure max connections and timeouts
+   - Click "Start Server"
+
+2. **Monitor Server**
+   - View real-time connection statistics
+   - Monitor traffic (sent/received bytes and rates)
+   - Check server logs
+
+3. **Client Configuration**
+   - Use standard Shadowsocks clients
+   - Connect using the configured server address, port, password, and method
+
+## Troubleshooting
+
+### Build Issues
+
+- Ensure Python 3.11+ is installed
+- Install dependencies: `pip install shadowsocks pyinstaller`
+- Check [docs/BUILD_V3_README.md](docs/BUILD_V3_README.md)
+
+### Runtime Issues
+
+- **Antivirus Blocking**: Add executable to antivirus whitelist
+- **Port Already in Use**: Change the port in configuration
+- **Firewall**: Ensure firewall allows the listening port
+
+### Connection Issues
+
+- Verify password and encryption method match client configuration
+- Check firewall settings
+- Ensure server is running and listening on correct address
+
+## Development
+
+### Running Tests
+
 ```bash
-python build_exe_v2.py
+# Test imports
+python -c "from shadowsocks_v2_refactored import compat; print('OK')"
+
+# Test server
+python -m shadowsocks_v2_refactored
 ```
 
-**方法三：使用 PyInstaller**
-```bash
-pyinstaller ShadowsocksServerV2.spec
-```
+### Contributing
 
-打包完成后，exe 文件会生成在 `dist` 目录中。
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-## 功能特性
+## License
 
-- ✅ 现代化深色主题 UI
-- ✅ 响应式布局（可调整窗口大小）
-- ✅ 详细的连接统计（当前连接、总连接、拒绝连接、已关闭连接）
-- ✅ 详细的线程统计（活跃线程、线程池大小、空闲线程）
-- ✅ 实时流量统计（发送/接收流量及速率）
-- ✅ 运行时间显示
-- ✅ 线程池和连接管理
-- ✅ 自动连接清理机制
-- ✅ 支持流式传输（AI 应用）
+This project uses the shadowsocks library, which is licensed under Apache License 2.0.
 
-## 使用说明
+## Acknowledgments
 
-1. **启动服务器**
-   - 设置监听地址和端口（默认：0.0.0.0:1080）
-   - 设置密码（必填）
-   - 选择加密方法（默认：aes-256-cfb）
-   - 配置最大线程数和连接数
-   - 点击"启动服务器"按钮
+- Built on [shadowsocks](https://github.com/shadowsocks/shadowsocks) library
+- Uses PyInstaller for executable packaging
+- GitHub Actions for automated builds
 
-2. **监控服务器**
-   - 实时查看连接数和线程数
-   - 监控流量统计
-   - 查看运行日志
+## Links
 
-3. **客户端配置**
-   - 查看"客户端配置信息"区域获取连接参数
-   - 使用标准 Shadowsocks 客户端连接
-
-## 配置说明
-
-程序会在运行目录生成 `shadowsocks_config.json` 配置文件，自动保存服务器配置。
-
-## 系统要求
-
-- Python 3.7+（如果运行 Python 脚本）
-- Windows 7+（exe 文件）
-- shadowsocks 库（运行 Python 脚本时需要）
-
-## 依赖包
-
-- shadowsocks >= 3.0.0
-- pyinstaller >= 5.0.0（打包时需要）
-
-## 注意事项
-
-1. **杀毒软件拦截**：首次运行 exe 文件可能会被杀毒软件拦截，需要添加信任。
-
-2. **端口占用**：如果端口被占用，程序会提示错误。
-
-3. **防火墙**：确保防火墙允许程序监听端口。
-
-4. **管理员权限**：某些情况下可能需要管理员权限运行。
-
-## 故障排除
-
-### 打包失败
-- 确保已安装 shadowsocks 和 pyinstaller
-- 检查 Python 版本是否为 3.7+
-
-### 运行错误
-- 检查是否有杀毒软件拦截
-- 尝试以管理员身份运行
-- 查看错误日志
-
-### UI 显示问题
-- 确保系统支持 tkinter
-- 检查字体是否安装（Microsoft YaHei UI）
-
-## 版本历史
-
-### V2 版本
-- 现代化深色主题 UI
-- 详细的监控功能
-- 响应式布局
-- 改进的错误处理
-
-## 许可证
-
-本项目使用标准 Shadowsocks 协议，遵循相关开源协议。
-
+- **Repository**: https://github.com/ShamirSecret/shadowsocket
+- **Issues**: https://github.com/ShamirSecret/shadowsocket/issues
+- **Releases**: https://github.com/ShamirSecret/shadowsocket/releases

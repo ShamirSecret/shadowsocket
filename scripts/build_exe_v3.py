@@ -38,8 +38,10 @@ def build():
         print("[ERROR] shadowsocks 库未安装，请先运行: pip install shadowsocks")
         sys.exit(1)
     
-    # 获取主文件路径
-    main_file = os.path.join('shadowsocks_v2_refactored', 'main.py')
+    # 获取主文件路径（从脚本目录回到项目根目录）
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    main_file = os.path.join(project_root, 'shadowsocks_v2_refactored', 'main.py')
     if not os.path.exists(main_file):
         print(f"[ERROR] 找不到主文件: {main_file}")
         sys.exit(1)
@@ -51,7 +53,7 @@ def build():
     is_macos = platform.system() == 'Darwin'
     
     # 检查是否有 spec 文件
-    spec_file = 'ShadowsocksServerV3.spec'
+    spec_file = os.path.join(script_dir, 'ShadowsocksServerV3.spec')
     if os.path.exists(spec_file) and is_windows:
         print(f"\n使用配置文件: {spec_file}")
         args = [
@@ -82,7 +84,7 @@ def build():
             '--hidden-import=tkinter.ttk',
             '--hidden-import=tkinter.scrolledtext',
             '--collect-all=shadowsocks',    # 收集所有 shadowsocks 相关文件
-            '--paths=.',                    # 添加当前目录到路径
+            f'--paths={project_root}',      # 添加项目根目录到路径
         ]
         
         # Windows 特定参数
@@ -98,16 +100,17 @@ def build():
         PyInstaller.__main__.run(args)
         
         # 根据平台确定输出文件路径
+        dist_dir = os.path.join(project_root, 'dist')
         if is_windows:
-            output_path = os.path.join('dist', 'ShadowsocksServerV3.exe')
+            output_path = os.path.join(dist_dir, 'ShadowsocksServerV3.exe')
             output_name = "exe 文件"
             platform_name = "Windows"
         elif is_macos:
-            output_path = os.path.join('dist', 'ShadowsocksServerV3.app')
+            output_path = os.path.join(dist_dir, 'ShadowsocksServerV3.app')
             output_name = "应用"
             platform_name = "macOS"
         else:
-            output_path = os.path.join('dist', 'ShadowsocksServerV3')
+            output_path = os.path.join(dist_dir, 'ShadowsocksServerV3')
             output_name = "可执行文件"
             platform_name = platform.system()
         

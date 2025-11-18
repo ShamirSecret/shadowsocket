@@ -45,10 +45,14 @@ shadowsocks_config.json
 
 # PyInstaller
 *.spec
-!ShadowsocksServerV3.spec
+!scripts/ShadowsocksServerV3.spec
 
 # Build artifacts
 build/
 dist/
 *.log
 
+# Temporary files
+*.tmp
+*.bak
+*~

@@ -27,7 +27,7 @@ jobs:
     
     - name: Build Windows EXE
       run: |
-        python build_exe_v3.py
+        python scripts/build_exe_v3.py
     
     - name: Upload Windows EXE
       uses: actions/upload-artifact@v4
@@ -56,7 +56,7 @@ jobs:
     
     - name: Build macOS APP
       run: |
-        python build_macos_app.py
+        python scripts/build_macos_app.py
     
     - name: Upload macOS APP
       uses: actions/upload-artifact@v4

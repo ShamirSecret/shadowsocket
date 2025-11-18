@@ -31,8 +31,10 @@ def build():
         print("[WARNING] tkinter 不可用，GUI 功能可能无法使用")
         print("提示：macOS 上可能需要安装 Python 的 tkinter 支持")
     
-    # 获取主文件路径
-    main_file = os.path.join('shadowsocks_v2_refactored', 'main.py')
+    # 获取主文件路径（从脚本目录回到项目根目录）
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    main_file = os.path.join(project_root, 'shadowsocks_v2_refactored', 'main.py')
     if not os.path.exists(main_file):
         print(f"[ERROR] 找不到主文件: {main_file}")
         sys.exit(1)
@@ -61,7 +63,7 @@ def build():
         '--hidden-import=tkinter.ttk',
         '--hidden-import=tkinter.scrolledtext',
         '--collect-all=shadowsocks',    # 收集所有 shadowsocks 相关文件
-        '--paths=.',                    # 添加当前目录到路径
+            f'--paths={project_root}',      # 添加项目根目录到路径
         '--osx-bundle-identifier=com.shadowsocks.server.v3',  # Bundle ID
     ]
     
@@ -69,7 +71,8 @@ def build():
         print("\n正在打包，请稍候...")
         PyInstaller.__main__.run(args)
         
-        app_path = os.path.join('dist', 'ShadowsocksServerV3.app')
+        dist_dir = os.path.join(project_root, 'dist')
+        app_path = os.path.join(dist_dir, 'ShadowsocksServerV3.app')
         if os.path.exists(app_path):
             # 计算 app 大小
             def get_size(path):

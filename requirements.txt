@@ -1,8 +1,8 @@
-# Shadowsocks 服务端依赖
+# Shadowsocks Server V3 Dependencies
 
-# 标准 Shadowsocks 库（必需）
+# Shadowsocks library (required)
 shadowsocks>=2.8.2
 
-# 打包工具（在可以安装 pip 的环境中安装）
+# Build tools (required for building executables)
 pyinstaller>=5.0.0
 

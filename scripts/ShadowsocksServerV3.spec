@@ -1,9 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 # Shadowsocks 服务端 V3 Refactored 打包配置
 
+import os
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(SPEC)))
+
 a = Analysis(
-    ['shadowsocks_v2_refactored/main.py'],
-    pathex=['.'],
+    [os.path.join(project_root, 'shadowsocks_v2_refactored', 'main.py')],
+    pathex=[project_root],
     binaries=[],
     datas=[],
     hiddenimports=[
