@@ -1,8 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
-# Shadowsocks 服务端 V3 Refactored 打包配置
+# Shadowsocks Server V3 Refactored Build Configuration
 
 import os
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(SPEC)))
+# Get project root directory (parent of scripts directory)
+spec_dir = os.path.dirname(os.path.abspath(SPEC))
+project_root = os.path.dirname(spec_dir)
 
 a = Analysis(
     [os.path.join(project_root, 'shadowsocks_v2_refactored', 'main.py')],
