@@ -1,0 +1,8 @@
+# Shadowsocks 服务端依赖
+
+# 标准 Shadowsocks 库（必需）
+shadowsocks>=2.8.2
+
+# 打包工具（在可以安装 pip 的环境中安装）
+pyinstaller>=5.0.0
+

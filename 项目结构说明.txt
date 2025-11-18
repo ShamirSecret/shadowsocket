@@ -1,0 +1,56 @@
+Shadowsocks 服务端 V2 - 项目结构说明
+==========================================
+
+本文件夹包含 Shadowsocks 服务端 V2 的所有有用代码和文件。
+
+文件列表：
+----------
+
+1. shadowsocket_v2.py
+   - 主程序文件
+   - 包含服务器逻辑和GUI界面
+   - 可以直接运行：python shadowsocket_v2.py
+
+2. ShadowsocksServerV2.spec
+   - PyInstaller 打包配置文件
+   - 用于生成 exe 文件
+
+3. build_exe_v2.py
+   - Python 打包脚本
+   - 运行：python build_exe_v2.py
+
+4. build_v2.bat
+   - Windows 批处理打包脚本
+   - 双击运行即可自动打包
+
+5. requirements.txt
+   - Python 依赖包列表
+   - 安装：pip install -r requirements.txt
+
+6. BUILD_README.md
+   - 详细的打包说明文档
+
+7. README.md
+   - 项目说明和使用指南
+
+8. .gitignore
+   - Git 忽略文件配置
+
+9. dist/ 目录（如果存在）
+   - 包含打包后的 exe 文件
+
+使用说明：
+----------
+
+快速开始：
+1. 安装依赖：pip install -r requirements.txt
+2. 运行程序：python shadowsocket_v2.py
+
+打包：
+1. 双击 build_v2.bat（推荐）
+2. 或运行：python build_exe_v2.py
+
+注意事项：
+- 首次运行 exe 可能会被杀毒软件拦截，需要添加信任
+- 程序会在运行目录生成 shadowsocks_config.json 配置文件
+
