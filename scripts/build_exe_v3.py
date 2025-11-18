@@ -24,18 +24,18 @@ if sys.platform == 'win32':
         pass
 
 def build():
-    """打包成可执行文件"""
+    """Build executable"""
     print("=" * 60)
-    print("开始打包 Shadowsocks V2 Refactored...")
-    print(f"平台: {platform.system()} {platform.release()}")
+    print("Building Shadowsocks Server UI...")
+    print(f"Platform: {platform.system()} {platform.release()}")
     print("=" * 60)
     
-    # 检查依赖
+    # Check dependencies
     try:
         import shadowsocks
-        print("[OK] shadowsocks 库已安装")
+        print("[OK] shadowsocks library installed")
     except ImportError:
-        print("[ERROR] shadowsocks 库未安装，请先运行: pip install shadowsocks")
+        print("[ERROR] shadowsocks library not installed, please run: pip install shadowsocks")
         sys.exit(1)
     
     # 获取主文件路径（从脚本目录回到项目根目录）
@@ -43,34 +43,37 @@ def build():
     project_root = os.path.dirname(script_dir)
     main_file = os.path.join(project_root, 'shadowsocks_server_ui', 'main.py')
     if not os.path.exists(main_file):
-        print(f"[ERROR] 找不到主文件: {main_file}")
+        print(f"[ERROR] Main file not found: {main_file}")
+        print(f"[DEBUG] Project root: {project_root}")
+        print(f"[DEBUG] Script dir: {script_dir}")
+        print(f"[DEBUG] Current working directory: {os.getcwd()}")
         sys.exit(1)
     
-    print(f"\n主文件: {main_file}")
+    print(f"\nMain file: {main_file}")
     
-    # 根据平台选择打包参数
+    # Select build parameters based on platform
     is_windows = platform.system() == 'Windows'
     is_macos = platform.system() == 'Darwin'
     
-    # 检查是否有 spec 文件
+    # Check if spec file exists
     spec_file = os.path.join(script_dir, 'ShadowsocksServerV3.spec')
     if os.path.exists(spec_file) and is_windows:
-        print(f"\n使用配置文件: {spec_file}")
+        print(f"\nUsing spec file: {spec_file}")
         args = [
             spec_file,
             '--clean',
             '--noconfirm',
         ]
     else:
-        # 构建 PyInstaller 参数
-        print("\n使用命令行参数打包...")
+        # Build PyInstaller arguments
+        print("\nUsing command line arguments...")
         args = [
             main_file,
-            '--name=ShadowsocksServerV3',  # 生成的名称
-            '--windowed',                   # 无控制台窗口（GUI 应用）
-            '--clean',                      # 清理临时文件
-            '--noconfirm',                  # 不询问覆盖
-            '--hidden-import=shadowsocks',  # 确保包含 shadowsocks 库
+            '--name=ShadowsocksServerV3',  # Output name
+            '--windowed',                   # No console window (GUI app)
+            '--clean',                      # Clean temporary files
+            '--noconfirm',                  # Don't ask for overwrite
+            '--hidden-import=shadowsocks',  # Ensure shadowsocks library is included
             '--hidden-import=shadowsocks.encrypt',
             '--hidden-import=shadowsocks.eventloop',
             '--hidden-import=shadowsocks.tcprelay',
@@ -83,21 +86,40 @@ def build():
             '--hidden-import=tkinter',
             '--hidden-import=tkinter.ttk',
             '--hidden-import=tkinter.scrolledtext',
-            '--collect-all=shadowsocks',    # 收集所有 shadowsocks 相关文件
-            f'--paths={project_root}',      # 添加项目根目录到路径
+            '--hidden-import=shadowsocks_server_ui',
+            '--hidden-import=shadowsocks_server_ui.server',
+            '--hidden-import=shadowsocks_server_ui.tcprelay_ext',
+            '--hidden-import=shadowsocks_server_ui.config',
+            '--hidden-import=shadowsocks_server_ui.config.manager',
+            '--hidden-import=shadowsocks_server_ui.config.defaults',
+            '--hidden-import=shadowsocks_server_ui.stats',
+            '--hidden-import=shadowsocks_server_ui.stats.collector',
+            '--hidden-import=shadowsocks_server_ui.gui',
+            '--hidden-import=shadowsocks_server_ui.gui.main_window',
+            '--hidden-import=shadowsocks_server_ui.gui.config_panel',
+            '--hidden-import=shadowsocks_server_ui.gui.monitor_panel',
+            '--hidden-import=shadowsocks_server_ui.gui.log_panel',
+            '--collect-all=shadowsocks',    # Collect all shadowsocks related files
+            f'--paths={project_root}',      # Add project root to path
         ]
         
-        # Windows 特定参数
+        # Windows specific parameters
         if is_windows:
-            args.append('--onefile')  # Windows 打包成单个 .exe 文件
+            args.append('--onefile')  # Windows: package as single .exe file
         
-        # macOS 特定参数
+        # macOS specific parameters
         if is_macos:
             args.append('--osx-bundle-identifier=com.shadowsocks.server.v3')
     
     try:
-        print("\n正在打包，请稍候...")
-        PyInstaller.__main__.run(args)
+        print("\nBuilding, please wait...")
+        # Change to project root directory for build
+        original_cwd = os.getcwd()
+        os.chdir(project_root)
+        try:
+            PyInstaller.__main__.run(args)
+        finally:
+            os.chdir(original_cwd)
         
         # 根据平台确定输出文件路径
         dist_dir = os.path.join(project_root, 'dist')
@@ -129,28 +151,33 @@ def build():
                 file_size = os.path.getsize(output_path) / (1024 * 1024)  # MB
             
             print("\n" + "=" * 60)
-            print("[SUCCESS] 打包完成！")
+            print("[SUCCESS] Build completed!")
             print("=" * 60)
-            print(f"{output_name}位置: {output_path}")
-            print(f"文件大小: {file_size:.2f} MB")
-            print("\n提示：")
+            print(f"{output_name} location: {output_path}")
+            print(f"File size: {file_size:.2f} MB")
+            print("\nNotes:")
             if is_windows:
-                print("1. 打包后的 exe 文件可以在任何 Windows 系统上运行，无需安装 Python")
-                print("2. 首次运行可能会被杀毒软件拦截，需要添加信任")
+                print("1. The exe file can run on any Windows system without Python installation")
+                print("2. First run may be blocked by antivirus, add to whitelist")
             elif is_macos:
-                print("1. 打包后的 .app 文件可以在 macOS 系统上运行")
-                print("2. 首次运行可能需要右键点击 -> 打开（绕过 Gatekeeper）")
-            print("3. V3 版本基于 shadowsocks 官方库的事件循环架构")
-            print("4. 修复了连续下载断开的问题")
-            print("5. 支持长时间下载，不会因为空闲超时而断开")
-            print("6. 支持 Python 3.13+")
+                print("1. The .app file can run on macOS systems")
+                print("2. First run may require right-click -> Open (bypass Gatekeeper)")
+            print("3. Based on shadowsocks official library's event loop architecture")
+            print("4. Fixed continuous download disconnection issues")
+            print("5. Supports long downloads without idle timeout disconnection")
+            print("6. Supports Python 3.13+")
         else:
-            print(f"\n[ERROR] 打包失败：未找到生成的 {output_name}")
+            print(f"\n[ERROR] Build failed: {output_name} not found")
+            print(f"[DEBUG] Expected path: {output_path}")
+            print(f"[DEBUG] Project root: {project_root}")
+            print(f"[DEBUG] Dist directory exists: {os.path.exists(dist_dir)}")
+            if os.path.exists(dist_dir):
+                print(f"[DEBUG] Files in dist: {os.listdir(dist_dir)}")
             sys.exit(1)
             
     except Exception as e:
-        print(f"\n[ERROR] 打包失败: {str(e)}")
-        print("\n请确保已安装以下依赖：")
+        print(f"\n[ERROR] Build failed: {str(e)}")
+        print("\nPlease ensure the following dependencies are installed:")
         print("pip install pyinstaller shadowsocks")
         import traceback
         traceback.print_exc()

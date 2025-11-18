@@ -1,13 +1,12 @@
 name: Build Windows EXE
 
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:  # Manual trigger
   push:
     tags:
-      - 'v*'  # 推送标签时自动触发
-  push:
+      - 'v*'  # Auto-trigger on tag push
     branches:
-      - main  # 推送到 main 分支时触发（可选）
+      - main  # Auto-trigger on main branch push (optional)
 
 jobs:
   build-windows:
@@ -30,6 +29,8 @@ jobs:
     - name: Build Windows EXE
       run: |
         python scripts/build_exe_v3.py
+      working-directory: .
+      continue-on-error: false
     
     - name: Upload EXE artifact
       uses: actions/upload-artifact@v4
