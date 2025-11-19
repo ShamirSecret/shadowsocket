@@ -1,32 +1,15 @@
-# Shadowsocks Server UI
+# Shadowsocks Server for Windows
 
-A cross-platform Shadowsocks proxy server designed to enable sharing and distribution of Windows-only VPN tools across all platforms (Windows, macOS, Linux). Built on the official shadowsocks library's event loop architecture with a modern web-based management interface.
-
-## Project Purpose
-
-This project aims to **bridge the gap** between Windows-exclusive VPN tools and other platforms by:
-
-- 🌐 **Cross-Platform Distribution**: Share Windows-only VPN configurations with macOS and Linux users
-- 🔄 **Protocol Translation**: Convert Windows VPN tools to standard Shadowsocks protocol
-- 👥 **Easy Sharing**: Simple web interface for managing and sharing proxy configurations
-- 📱 **Universal Access**: Access Windows VPN resources from any platform
-
-### Use Cases
-
-- **VPN Tool Sharing**: Share access to Windows-only VPN software with team members on different platforms
-- **Cross-Platform Access**: Use Windows VPN services on macOS/Linux without dual-booting
-- **Resource Distribution**: Distribute VPN access across multiple devices and platforms
-- **Team Collaboration**: Enable team members to use the same VPN resources regardless of their OS
+A cross-platform Shadowsocks proxy server with a modern web-based management interface. Supports Windows, macOS, and Linux.
 
 ## Features
 
 - ✅ **Cross-Platform**: Runs on Windows, macOS, and Linux
-- ✅ **Modern Web UI**: Beautiful, responsive web interface for easy management
-- ✅ **Event Loop Architecture**: Stable connections, fixes download disconnection issues
-- ✅ **Real-time Statistics**: Monitor connections, traffic, and performance
+- ✅ **Web Management Interface**: Clean and intuitive web interface for easy configuration
+- ✅ **Real-time Statistics**: Monitor connections, traffic, and performance metrics
 - ✅ **Easy Configuration**: Simple web form for server settings
-- ✅ **Connection Management**: Advanced connection pooling and timeout management
-- ✅ **Python 3.13+ Compatible**: Works with latest Python versions
+- ✅ **Connection Management**: Efficient connection pooling and timeout management
+- ✅ **Python 3.11+**: Supports Python 3.11, 3.12, and 3.13
 
 ## Quick Start
 
@@ -34,8 +17,8 @@ This project aims to **bridge the gap** between Windows-exclusive VPN tools and 
 
 ```bash
 # Clone the repository
-git clone https://github.com/ShamirSecret/shadowsocket.git
-cd shadowsocks-server-v2
+git clone https://github.com/ShamirSecret/shadowsock-server-for-windows.git
+cd shadowsock-server-for-windows
 
 # Install dependencies
 pip install -r requirements.txt
@@ -57,15 +40,15 @@ pip install -r requirements.txt
 
 4. **Configure the server**:
    - Set your password (this will be shared with clients)
-   - Choose encryption method (recommended: `chacha20-ietf-poly1305` for better stealth)
+   - Choose encryption method (recommended: `chacha20-ietf-poly1305`)
    - Configure port and other settings
    - Click "Save Configuration"
 
-5. **Start the server** and share the configuration with your team
+5. **Start the server** and share the configuration with users
 
 ### Sharing Configuration
 
-Once your server is running, share these details with users who want to access your Windows VPN:
+Once your server is running, share these details with users:
 
 ```
 Server Address: [Your server IP or domain]
@@ -75,31 +58,22 @@ Encryption Method: [Your configured method, e.g., aes-256-cfb]
 ```
 
 **Client Setup**:
-- **Windows**: Use any Shadowsocks client (Shadowsocks-Windows, etc.)
-- **macOS**: Use ShadowsocksX-NG, ClashX, or V2RayU
-- **Linux**: Use shadowsocks-libev, shadowsocks-qt5, or V2Ray
-- **Mobile**: Use Shadowsocks Android/iOS apps
+- **Windows**: Shadowsocks-Windows, Clash for Windows
+- **macOS**: ShadowsocksX-NG, ClashX, V2RayU
+- **Linux**: shadowsocks-libev, shadowsocks-qt5, V2Ray
+- **Mobile**: Shadowsocks Android/iOS apps
 
 ## Project Structure
 
 ```
-shadowsocks-server-v2/
+shadowsock-server-for-windows/
 ├── shadowsocks_server_ui/        # Main application code
 │   ├── main.py                   # Entry point
 │   ├── server.py                 # Server implementation
-│   ├── tcprelay_ext.py          # Extended TCP relay
-│   ├── compat.py                # Python 3.13 compatibility
-│   ├── config/                  # Configuration management
-│   ├── web/                     # Web interface (Flask)
-│   │   ├── app.py              # Flask application
-│   │   ├── templates/          # HTML templates
-│   │   └── static/             # CSS, JS, images
-│   └── stats/                   # Statistics collection
-├── scripts/                      # Build and utility scripts
-│   ├── build_exe_v3.py          # Windows build script
-│   ├── build_macos_app.py       # macOS build script
-│   └── ShadowsocksServerV3.spec # PyInstaller spec
-├── .github/workflows/            # GitHub Actions CI/CD
+│   ├── config/                   # Configuration management
+│   ├── web/                      # Web interface (Flask)
+│   └── stats/                    # Statistics collection
+├── scripts/                      # Build scripts
 ├── requirements.txt              # Python dependencies
 ├── shadowsocks_config.json.example # Configuration template
 └── README.md                     # This file
@@ -112,7 +86,7 @@ shadowsocks-server-v2/
 GitHub Actions automatically builds executables for Windows and macOS:
 
 1. Push code to GitHub
-2. Go to [Actions](https://github.com/ShamirSecret/shadowsocket/actions)
+2. Go to [Actions](https://github.com/ShamirSecret/shadowsock-server-for-windows/actions)
 3. Download the built executables from the latest workflow run
 
 ### Manual Build
@@ -158,27 +132,11 @@ The server configuration is saved in `shadowsocks_config.json` (this file is git
 
 ### Encryption Methods
 
-For better stealth and compatibility with services like ChatGPT/X:
+Recommended encryption methods for better stealth and compatibility:
 
 - **Recommended**: `chacha20-ietf-poly1305` - Most stealthy, harder to detect
 - **Alternative**: `chacha20-ietf` - Good balance of speed and stealth
 - **Standard**: `aes-256-cfb` - Widely compatible, good performance
-
-## Architecture
-
-This project uses the official shadowsocks library's event loop architecture:
-
-- **Event Loop**: Uses epoll/kqueue/select for efficient I/O
-- **Non-blocking I/O**: All sockets are non-blocking with event-driven reads/writes
-- **Timeout Management**: Precise timeout handling using timestamp queues
-- **Connection Pooling**: Advanced connection management with limits
-
-### Key Features
-
-1. **Stable Connections**: Event loop architecture prevents connection timeouts during long downloads
-2. **High Performance**: Non-blocking I/O improves throughput and reduces latency
-3. **Cross-Platform**: Works identically on Windows, macOS, and Linux
-4. **Python 3.13+ Support**: Compatibility layer fixes `collections.MutableMapping` issue
 
 ## Usage Guide
 
@@ -301,19 +259,13 @@ python -m shadowsocks_server_ui
 
 ## License
 
-This project uses the shadowsocks library, which is licensed under Apache License 2.0.
-
-## Acknowledgments
-
-- Built on [shadowsocks](https://github.com/shadowsocks/shadowsocks) library
-- Uses PyInstaller for executable packaging
-- GitHub Actions for automated builds
+This project is licensed under Apache License 2.0.
 
 ## Links
 
-- **Repository**: https://github.com/ShamirSecret/shadowsocket
-- **Issues**: https://github.com/ShamirSecret/shadowsocket/issues
-- **Releases**: https://github.com/ShamirSecret/shadowsocket/releases
+- **Repository**: https://github.com/ShamirSecret/shadowsock-server-for-windows
+- **Issues**: https://github.com/ShamirSecret/shadowsock-server-for-windows/issues
+- **Releases**: https://github.com/ShamirSecret/shadowsock-server-for-windows/releases
 
 ## Support
 
@@ -321,4 +273,4 @@ For issues, questions, or contributions, please open an issue on GitHub.
 
 ---
 
-**Note**: This project is designed to enable cross-platform access to VPN resources. Ensure you comply with all applicable laws and regulations when using proxy/VPN services.
+**Note**: Ensure you comply with all applicable laws and regulations when using proxy/VPN services.
